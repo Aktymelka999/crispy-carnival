@@ -47,3 +47,10 @@ if __name__ == "__main__":
     except Exception as e:
         logger.error(f"Непредвиденная ошибка: {e}")
         sys.exit(1)
+
+
+        from src.masks import MaskProcessor
+
+processor = MaskProcessor()
+result = processor.apply_mask("test_image", "test_mask")
+print("Обработка завершена")

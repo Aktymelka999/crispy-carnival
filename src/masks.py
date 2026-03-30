@@ -62,3 +62,8 @@ def get_mask_account(account_number: str) -> str:
     masked_account = '**' + digits[-4:]
     
     return masked_account
+
+class MaskProcessor:
+    def apply_mask(self, image, mask):
+        # Заглушка для логики обработки
+        return image
