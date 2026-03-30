@@ -67,3 +67,9 @@ class MaskProcessor:
     def apply_mask(self, image, mask):
         # Заглушка для логики обработки
         return image
+
+def apply_mask(self, image, mask):
+    if not mask:
+        raise ValueError("Маска не может быть пустой")
+    # Логика обработки
+    return f"{image}_with_{mask}"

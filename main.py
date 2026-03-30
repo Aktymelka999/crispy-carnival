@@ -54,3 +54,8 @@ if __name__ == "__main__":
 processor = MaskProcessor()
 result = processor.apply_mask("test_image", "test_mask")
 print("Обработка завершена")
+
+try:
+    result = processor.apply_mask("test_image", "")
+except ValueError as e:
+    print(f"Ошибка: {e}")
