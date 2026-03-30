@@ -1,0 +1,99 @@
+[project]
+name = "project.py"
+version = "0.1.0"
+description = ""
+authors = [
+    {name = "Ksenia"}
+]
+requires-python = ">=3.14"
+dependencies = []
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry]
+name = "project.py"
+version = "0.1.0"
+description = ""
+authors = ["Ksenia <gertrudadeputat35@gmail.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+
+# Используем единую группу dev для всех инструментов разработки
+[tool.poetry.group.dev.dependencies]
+flake8 = ">=7.3.0,<8.0.0"
+black = ">=26.3.1,<27.0.0"
+isort = ">=8.0.1,<9.0.0"
+mypy = ">=1.19.1,<2.0.0"
+pytest = "^7.0"
+
+[tool.black]
+line-length = 119
+target-version = ["py38"]
+include = "\\.pyi?$"
+extend-exclude = '''
+/(
+  | \\.eggs
+  | \\.git
+  | \\.hg
+  | \\.mypy_cache
+  | \\.tox
+  | \\.venv
+  | build
+  | dist
+)/
+'''
+
+[tool.isort]
+profile = "black"
+line_length = 119
+multi_line_output = 3
+include_trailing_comma = true
+force_grid_wrap = 0
+use_parentheses = true
+ensure_newline_before_comments = true
+
+[tool.flake8]
+max-line-length = 119
+extend-ignore = ["E203", "W503"]
+exclude = [
+    ".git",
+    "__pycache__",
+    "docs/source/conf.py",
+    "build",
+    "dist"
+]
+per-file-ignores = [
+    "__init__.py: F401"
+]
+select = ["B", "C", "E", "F", "W", "T4", "B9"]
+
+[tool.mypy]
+python_version = "3.8"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
+disallow_untyped_decorators = true
+disallow_any_generics = true
+no_implicit_optional = true
+strict_equality = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+
+[[tool.mypy.overrides]]
+module = ["*.pyi"]
+disallow_untyped_defs = false
+
+[[tool.mypy.overrides]]
+module = ["tests.*"]
+disallow_untyped_defs = false
+
+[tool.poetry.scripts]
+lint = "flake8 ."
+format = "black . && isort ."
+type-check = "mypy ."
+test-all = "pytest && mypy . && flake8 ."
