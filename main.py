@@ -1,61 +1,34 @@
-#!/usr/bin/env python3
-"""
-Точка входа в консольное приложение для обработки данных.
-"""
+from src.widget import get_date, mask_account_card
 
-import sys
-import logging
-import argparse
-
-from config import load_config
-from services.database import Database
-from core.processor import DataProcessor
-
-# Настройка логирования
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s'
-)
-logger = logging.getLogger(__name__)
-
-def parse_arguments():
-    """Парсинг аргументов командной строки."""
-    parser = argparse.ArgumentParser(description='Обработка данных')
-    parser.add_argument('--debug', action='store_true', help='Включить режим отладки')
-    parser.add_argument('--config', type=str, default='config.yaml', help='Файл конфигурации')
-    return parser.parse_args()
 
 def main():
-    args = parse_arguments()
-    config = load_config(args.config)
-    db = Database(config['database_url'])
-    processor = DataProcessor(db)
+    # Тестовые случаи для маскировки карт и счетов
+    card_test_cases = [
+        "Maestro 1596837868705199",
+        "Счет 64686473678894779589",
+        "MasterCard 7158300734726758",
+        "Счет 35383033474447895560",
+        "Visa Classic 6831982476737658",
+        "Visa Platinum 8990922113665229",
+        "Visa Gold 5999414228426353",
+        "Счет 73654108430135874305"
+    ]
 
-    if args.debug:
-        logging.getLogger().setLevel(logging.DEBUG)
+    date_test_case = "2024-03-11T02:26:18.671407"
 
-    logger.info("Запуск обработки данных...")
-    processor.process()
-    logger.info("Обработка завершена.")
+    print("=== ТЕСТИРОВАНИЕ МАСКИРОВКИ КАРТ И СЧЕТОВ ===")
+    for case in card_test_cases:
+        result = mask_account_card(case)
+        print(f"Вход: {case}")
+        print(f"Выход: {result}")
+        print("-" * 60)
+
+    print("\n=== ТЕСТИРОВАНИЕ ФУНКЦИИ get_date ===")
+    print(f"Вход: {date_test_case}")
+    result_date = get_date(date_test_case)
+    print(f"Выход: {result_date}")
+
+
 
 if __name__ == "__main__":
-    try:
-        main()
-    except KeyboardInterrupt:
-        logger.info("Программа прервана пользователем.")
-        sys.exit(0)
-    except Exception as e:
-        logger.error(f"Непредвиденная ошибка: {e}")
-        sys.exit(1)
-
-
-        from src.masks import MaskProcessor
-
-processor = MaskProcessor()
-result = processor.apply_mask("test_image", "test_mask")
-print("Обработка завершена")
-
-try:
-    result = processor.apply_mask("test_image", "")
-except ValueError as e:
-    print(f"Ошибка: {e}")
+    main()

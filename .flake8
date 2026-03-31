@@ -1,23 +1,12 @@
+
 [flake8]
-max-line-length = 88
-exclude = .git, __pycache__, docs/, build/, dist/, venv/
-ignore =
-    E203,  # Пробелы перед :
-    W503,  # Разрыв перед бинарным оператором
-    D100,  # Отсутствует докстринг у публичного модуля
-    D101,  # Отсутствует докстринг у публичного класса
-    B007  # Неиспользуемая переменная в цикле
-
-# Плагин flake8-import-order: контроль порядка импортов
-application-import-names = myproject, tests
-import-order-style = google
-
-
-# Плагин flake8-quotes: контроль типа кавычек
-inline-quotes = "
-docstring-quotes = '
-multiline-quotes = '''
-
-# Плагин flake8-builtins: запрет на использование встроенных имён как переменных
-builtins-ignorelist = id, str
- 
+exclude =
+    .git,
+    __pycache__,
+    docs/source/conf.py,
+    old,
+    build,
+    dist
+max-complexity = 10
+select = B,C,E,F,W,T4,B9
+ignore = E203,E501,W503
