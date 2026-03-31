@@ -29,6 +29,5 @@ def main():
     print(f"Выход: {result_date}")
 
 
-
 if __name__ == "__main__":
     main()

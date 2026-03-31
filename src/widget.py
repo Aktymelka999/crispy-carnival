@@ -31,7 +31,6 @@ def mask_account_card(input_string: str) -> str:
         return f"Ошибка: {e}"
 
 
-
 def get_date(date_string: str) -> str:
     """
     Преобразует строку с датой из формата ISO в формат ДД.ММ.ГГГГ.

@@ -5,7 +5,6 @@ def mask_card_number(card_number: str) -> str:
     return f"{card_number[:4]} {card_number[4:6]}** **** {card_number[-4:]}"
 
 
-
 def mask_account_number(account_number: str) -> str:
     """Маскирует номер счёта по шаблону: **XXXX (только последние 4 цифры)"""
     if len(account_number) != 20 or not account_number.isdigit():
