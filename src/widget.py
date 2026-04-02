@@ -16,7 +16,7 @@ def mask_account_card(input_string: str) -> str:
     parts = input_string.strip().split()
     number = parts[-1]  # последняя часть — номер
 
-    is_account = any(word.lower() in input_string.lower() for word in ['счёт', 'account'])
+    is_account = any(word.lower() in input_string.lower() for word in ['счет', 'account'])
 
     try:
         if is_account:
