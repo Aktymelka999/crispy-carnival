@@ -53,3 +53,23 @@ def get_date(date_string: str) -> str:
             f"Некорректный формат даты: {date_string}. "
             "Ожидаемый формат: YYYY-MM-DDTHH:MM:SS.ssssss"
         ) from e
+
+def filter_by_state(transactions: list, state: str = 'EXECUTED') -> list:
+    """Фильтрует список транзакций по значению поля 'state'."""
+    return [transaction for transaction in transactions if transaction.get('state') == state]
+
+def sort_by_date(transactions: list, reverse: bool = True) -> list:
+    """Сортирует список транзакций по дате."""
+    def parse_date(date_str: str) -> datetime:
+        return datetime.fromisoformat(date_str.replace('Z', '+00:00'))
+    return sorted(transactions, key=lambda x: parse_date(x['date']), reverse=reverse)
+
+# Существующий код виджета...
+class Widget:
+    def __init__(self, transactions):
+        self.transactions = transactions
+
+    def show_executed(self):
+        executed = filter_by_state(self.transactions)
+        sorted_executed = sort_by_date(executed)
+        return sorted_executed
