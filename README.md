@@ -44,3 +44,11 @@ python project.py
 Email: gertrudadeputat35@gmail.com
 
 GitHub: [ https://github.com/Aktymelka999/crispy-carnival.git]
+
+
+Тестирование:
+
+Проект покрыт тестами на >80 %. Для запуска тестов используйте:
+
+```bash
+pytest

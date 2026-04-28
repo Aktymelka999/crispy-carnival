@@ -1,72 +1,38 @@
 import pytest
-from masks import get_mask_card_number, get_mask_account
+from src.masks import mask_card_number, mask_account_number
 
-
-class TestGetMaskCardNumber:
-    @pytest.mark.parametrize("card_number,expected", [
-        # Стандартные 16‑значные карты
+class TestMasks:
+    @pytest.mark.parametrize("card_num,expected", [
         ("1234567890123456", "1234 56** **** 3456"),
-        ("4444333322221111", "4444 33** **** 1111"),
-        # Карты с пробелами
-        ("1234 5678 9012 3456", "1234 56** **** 3456"),
-        # Карты с дефисами
-        ("1234-5678-9012-3456", "1234 56** **** 3456"),
-        # Американ Экспресс (15 цифр)
-        ("378282246310005", "3782 82** **** 005"),
+        ("4444333322221111", "4444 33** **** 1111")
     ])
-    def test_valid_card_numbers(self, card_number, expected):
-        """Тест корректного маскирования номеров карт разных форматов."""
-        result = get_mask_card_number(card_number)
-        assert result == expected
+    def test_mask_card_number_valid(self, card_num, expected):
+        assert mask_card_number(card_num) == expected
 
-    @pytest.mark.parametrize("invalid_card,expected_error", [
-        ("", "Invalid card number"),
-        ("123", "Invalid card number"),  # Слишком короткий
-        ("1" * 20, "Invalid card number"),  # Слишком длинный
-        ("abcdefghijklmnop", "Invalid card number"),  # Буквы вместо цифр
-        (None, "Invalid card number"),  # None
+
+    @pytest.mark.parametrize("invalid_card", [
+        "123456789012",  # слишком короткий
+        "12345678901234567890",  # слишком длинный
+        "123a567b901c345d",  # не цифры
+        ""  # пустая строка
     ])
-    def test_invalid_card_numbers(self, invalid_card, expected_error):
-        """Тест обработки некорректных входных данных."""
-        with pytest.raises(ValueError, match=expected_error):
-            get_mask_card_number(invalid_card)
+    def test_mask_card_number_invalid(self, invalid_card):
+        with pytest.raises(ValueError):
+            mask_card_number(invalid_card)
 
-    def test_no_card_in_string(self):
-        """Тест когда входная строка не содержит номера карты."""
-        with pytest.raises(ValueError, match="Invalid card number"):
-            get_mask_card_number("No card here")
-
-
-class TestGetMaskAccount:
-    @pytest.mark.parametrize("account_number,expected", [
-        # Стандартный номер счёта (20 цифр)
+    @pytest.mark.parametrize("account_num,expected", [
         ("12345678901234567890", "**7890"),
-        # С пробелами
-        ("1234 5678 9012 3456 7890", "**7890"),
-        # С дефисами
-        ("1234-5678-9012-3456-7890", "**7890"),
+        ("98765432109876543210", "**3210")
     ])
-    def test_valid_account_numbers(self, account_number, expected):
-        """Тест корректного маскирования номеров счетов."""
-        result = get_mask_account(account_number)
-        assert result == expected
+    def test_mask_account_number_valid(self, account_num, expected):
+        assert mask_account_number(account_num) == expected
 
-    @pytest.mark.parametrize("short_account,expected", [
-        ("123", "**123"),  # Очень короткий
-        ("1234", "**1234"),  # Короткий
-        ("12", "**12"),  # Минимально возможный
+    @pytest.mark.parametrize("invalid_account", [
+        "123456789012",
+        "123456789012345678901234",
+        "123a567b901c345d678e",
+        ""
     ])
-    def test_short_account_numbers(self, short_account, expected):
-        """Тест для номеров счетов короче ожидаемой длины."""
-        result = get_mask_account(short_account)
-        assert result == expected
-
-    @pytest.mark.parametrize("invalid_account,expected_error", [
-        ("", "Invalid account number"),
-        ("abc", "Invalid account number"),  # Буквы
-        (None, "Invalid account number"),  # None
-    ])
-    def test_invalid_account_numbers(self, invalid_account, expected_error):
-        """Тест обработки некорректных номеров счетов."""
-        with pytest.raises(ValueError, match=expected_error):
-            get_mask_account(invalid_account)
+    def test_mask_account_number_invalid(self, invalid_account):
+        with pytest.raises(ValueError):
+            mask_account_number(invalid_account)

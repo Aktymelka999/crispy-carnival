@@ -83,3 +83,21 @@ def sort_by_date(data, ascending=True):
             raise
 
     return sorted(data, key=parse_date, reverse=not ascending)
+from datetime import datetime
+
+def sort_by_date(transactions, reverse=False):
+    """
+    Сортирует транзакции по дате.
+
+    Args:
+        transactions: список транзакций с полем 'date' в формате ISO
+        reverse: если True — сортировка по убыванию
+
+    Returns:
+        отсортированный список транзакций
+    """
+    def parse_date(date_str):
+        # Удаляем T и парсим до секунд
+        return datetime.strptime(date_str.split('T')[0], '%Y-%m-%d')
+
+    return sorted(transactions, key=lambda x: parse_date(x['date']), reverse=reverse)
