@@ -44,3 +44,29 @@ python project.py
 Email: gertrudadeputat35@gmail.com
 
 GitHub: [ https://github.com/Aktymelka999/crispy-carnival.git]
+
+
+## Тестирование:
+Цель тестирования — проверить корректность работы всех функций проекта и выявить ошибки.
+
+###Процесс тестирования
+- PyTest — для написания и запуска тестов.
+- Coverage.py — для измерения покрытия кода тестами.
+- Статические анализаторы (Flake8, mypy) — для проверки кода.
+
+# Установка зависимостей для тестирования
+pip install -r requirements-test.txt
+
+# Запуск тестов с PyTest
+pytest
+
+# Запуск с измерением покрытия кода
+coverage run -m pytest
+coverage report
+
+###Ключевые тестовые сценарии:
+корректность работы функции mask_account_card с разными входными данными;
+преобразование даты в функции get_date;
+фильтрация транзакций в filter_by_state;
+сортировка транзакций в sort_by_date;
+работа метода show_executed в классе Widget.

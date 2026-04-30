@@ -5,7 +5,7 @@ description = ""
 authors = [
     {name = "Ksenia"}
 ]
-requires-python = ">=3.14"
+requires-python = "^3.8"
 dependencies = []
 
 [build-system]
@@ -18,8 +18,6 @@ version = "0.1.0"
 description = ""
 authors = ["Ksenia <gertrudadeputat35@gmail.com>"]
 
-[tool.poetry.dependencies]
-python = "^3.8"
 
 # Используем единую группу dev для всех инструментов разработки
 [tool.poetry.group.dev.dependencies]
@@ -98,21 +96,5 @@ format = "black . && isort ."
 type-check = "mypy ."
 test-all = "pytest && mypy . && flake8 ."
 
-[tool.pytest.ini_options]
-pythonpaths = ["src"]
 
-[tool.poetry]
-name = "project"
-version = "0.1.0"
-description = ""
-authors = ["You"]
 
-[tool.poetry.dependencies]
-python = "^3.8"
-
-[tool.poetry.dev-dependencies]
-pytest = "^9.0"
-
-[tool.pytest.ini_options]
-pythonpaths = ["src"]
-testpaths = ["tests"]

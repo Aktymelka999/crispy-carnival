@@ -1,127 +1,76 @@
-from datetime import datetime
-from src.masks import mask_account_number, mask_card_number
-import logging
 
-# Константы для шаблонов вывода
-ACCOUNT_MASK_TEMPLATE = "Счёт {}"
-CARD_MASK_TEMPLATE = "{} {}"
-
-def mask_account_card(input_string: str) -> str:
+def mask_account_card(input_string):
     """
-    Обрабатывает строку с типом и номером карты/счёта и возвращает замаскированный номер.
+    Маскирует номер карты или счёта в строке.
+
+    Для карт: оставляет первые 6 и последние 4 цифры, остальные заменяет на *.
+    Для счетов: показывает только последние 4 цифры с ** впереди.
 
     Args:
-        input_string (str): строка с типом и номером
+        input_string (str): строка, содержащая тип и номер (например, "Visa 1234..." или "Счёт 123...").
 
     Returns:
-        str: строка с замаскированным номером
+        str: строка с замаскированным номером.
     """
-    if not input_string or not input_string.strip():
-        return "Ошибка: пустая строка"
+    if not isinstance(input_string, str):
+        return ""
 
-    parts = input_string.strip().split()
+    parts = input_string.split()
     if len(parts) < 2:
-        return "Ошибка: недостаточно данных в строке"
+        return input_string
 
-    number = parts[-1]  # последняя часть — номер
+    # Ищем номер — последовательность цифр
+    number = None
+    for part in parts:
+        if part.isdigit():
+            number = part
+            break
 
-    is_account = any(word.lower() in input_string.lower() for word in ['счёт', 'счет', 'account'])
-    
-    # Проверка на пустой список частей
-    if not parts:
-        return "Ошибка: пустая строка"
-    
-    number = parts[-1]  # последняя часть — номер
-    
-    is_account = any(word.lower() in input_string.lower() for word in ['счёт', 'account'])
+    if number is None:
+        return input_string  # если номера нет, возвращаем исходную строку
 
-    try:
-        if is_account:
-            masked_number = mask_account_number(number)
-            return ACCOUNT_MASK_TEMPLATE.format(masked_number)
-        else:
-            # Считаем, что всё остальное — карта
-            masked_number = mask_card_number(number)
-            card_name = ' '.join(parts[:-1])
-            return CARD_MASK_TEMPLATE.format(card_name, masked_number)
-    except ValueError as e:
-        return f"Ошибка: {e}"
+    # Определяем тип: если длина >= 16 — карта, иначе счёт
+    if len(number) >= 16:
+        # Маскируем номер карты: первые 6 цифр и последние 4 видны
+        masked_number = f"{number[:6]}**{number[-4:]}"
+        # Разбиваем на блоки по 4 цифры для читаемости
+        masked_number = (
+            masked_number[:4] + " " +
+            masked_number[4:8] + " **** " +
+            masked_number[-4:]
+        )
+    else:
+        # Для счёта показываем только последние 4 цифры
+        masked_number = f"**{number[-4:]}"
 
-def get_date(date_string: str) -> str:
+    return input_string.replace(number, masked_number)
+
+
+
+def get_date(date_string):
     """
-    Преобразует строку с датой из формата ISO в формат ДД.ММ.ГГГГ.
+    Извлекает дату в формате ДД.ММ.ГГГГ из строки.
+
+    Поддерживает форматы:
+    * ISO: "2023-01-15T10:30:00" → "15.01.2023"
+    * Просто дата: "2023-01-15" → "15.01.2023"
 
     Args:
-        date_string (str): строка с датой в формате "2024-03-11T02:26:18.671407"
+        date_string (str): исходная строка с датой.
 
     Returns:
-        str: строка с датой в формате "ДД.ММ.ГГГГ" (например, "11.03.2024")
-
-    Raises:
-        ValueError: если строка не соответствует ожидаемому формату
+        str: дата в формате ДД.ММ.ГГГГ или пустая строка при ошибке.
     """
-    if not date_string:
-        raise ValueError("Пустая строка даты")
+    if not isinstance(date_string, str):
+        return ""
 
-    # Убираем Z в конце, если есть
-    date_string_clean = date_string.rstrip('Z')
+    # Убираем время, если есть (разделитель T или пробел)
+    date_part = date_string.split("T")[0] if "T" in date_string else date_string
+    date_part = date_part.split()[0] if " " in date_part else date_part
 
+    # Ожидаем формат ГГГГ-ММ-ДД
     try:
-        dt = datetime.fromisoformat(date_string_clean)
-        formatted_date = dt.strftime("%d.%m.%Y")
-        return formatted_date
-    except ValueError as e:
-        logging.warning(f"Не удалось обработать дату: {date_string}")
-        raise ValueError(
-            f"Некорректный формат даты: {date_string}. "
-            "Ожидаемый формат: YYYY-MM-DDTHH:MM:SS.ssssss"
-        ) from e
-
-def filter_by_state(transactions: list, state: str = 'EXECUTED') -> list:
-    """Фильтрует список транзакций по значению поля 'state'."""
-    if not transactions:
-        return []
-    return [transaction for transaction in transactions if transaction.get('state') == state]
-    return [
-        transaction for transaction in transactions
-        if transaction.get('state') == state and transaction.get('state') is not None
-    ]
-
-def sort_by_date(transactions: list, reverse: bool = True) -> list:
-    """Сортирует список транзакций по дате."""
-    if not transactions:
-        return []
-
-    def parse_date(date_str: str) -> datetime:
-        # Убираем Z в конце, если есть
-        clean_date_str = date_str.rstrip('Z')
-        try:
-            return datetime.fromisoformat(clean_date_str)
-        except ValueError:
-            raise ValueError(f"Некорректный формат даты: {date_str}")
-
-    return sorted(transactions, key=lambda x: parse_date(x['date']), reverse=reverse)
-        return datetime.fromisoformat(date_str.replace('Z', '+00:00'))
-    
-    return sorted(
-        transactions,
-        key=lambda x: parse_date(x.get('date', '9999-01-01')),  # дефолтная дата
-        reverse=reverse
-    )
-
-class Widget:
-    def __init__(self, transactions: list):
-        """Инициализирует виджет с списком транзакций."""
-        if not isinstance(transactions, list):
-            raise TypeError("transactions должен быть списком")
-        self.transactions = transactions
-
-    def show_executed(self):
-        executed = filter_by_state(self.transactions)
-        sorted_executed = sort_by_date(executed)
-        return sorted_executed
-    def show_executed(self) -> list:
-        """Возвращает отсортированный список выполненных транзакций."""
-        filtered_transactions = filter_by_state(self.transactions)
-        sorted_transactions = sort_by_date(filtered_transactions)
-        return sorted_transactions
+        year, month, day = map(int, date_part.split("-"))
+        return f"{day:02d}.{month:02d}.{year}"
+    except (ValueError, IndexError):
+        return ""  # при ошибке парсинга возвращаем пустую строку
