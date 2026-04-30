@@ -1,3 +1,4 @@
+
 def mask_account_card(input_string):
     """
     Маскирует номер карты или счёта в строке.
@@ -72,4 +73,4 @@ def get_date(date_string):
         year, month, day = map(int, date_part.split("-"))
         return f"{day:02d}.{month:02d}.{year}"
     except (ValueError, IndexError):
-        return ""  # при ошибке парсинга возвращаем пустую строк
+        return ""  # при ошибке парсинга возвращаем пустую строку
