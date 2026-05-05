@@ -97,4 +97,3 @@ type-check = "mypy ."
 test-all = "pytest && mypy . && flake8 ."
 
 
-

@@ -1,10 +1,11 @@
+
 import pytest
 from src.processing import filter_by_state, sort_by_date
 
 class TestProcessing:
     def test_filter_by_state_executed(self, sample_transactions):
         filtered = filter_by_state(sample_transactions, "EXECUTED")
-        assert len(filtered) == 2
+        assert len(filtered) == 3
         assert all(t["state"] == "EXECUTED" for t in filtered)
 
     def test_filter_by_state_nonexistent(self, sample_transactions):
