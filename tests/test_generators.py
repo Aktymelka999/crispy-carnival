@@ -1,5 +1,5 @@
 import pytest
-from src.generators.data_generators import (
+from src.generators import (
     filter_by_currency,
     description_generator,
     card_number_generator,
