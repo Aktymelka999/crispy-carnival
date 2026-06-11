@@ -72,4 +72,23 @@ def card_number_generator(start, end):
     for number in range(start, end + 1):
         yield f"{number:016d}"
 
+def transaction_descriptions(transactions):
+    """
+    Генератор, возвращающий описания транзакций по очереди.
 
+    Args:
+        transactions (list): список словарей с данными о транзакциях.
+            Каждый словарь может содержать ключ 'description'.
+
+    Yields:
+        str: описание транзакции, если оно есть; иначе — «Описание отсутствует».
+    """
+    for transaction in transactions:
+        if isinstance(transaction, dict) and 'description' in transaction:
+            description = transaction['description']
+            if description is not None and description != '':
+                yield description
+            else:
+                yield "Описание отсутствует"
+        else:
+            yield "Описание отсутствует"

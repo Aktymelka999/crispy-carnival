@@ -3,8 +3,9 @@ from src.generators import (
     filter_by_currency,
     description_generator,
     card_number_generator,
-    transaction_descriptions 
+    transaction_descriptions
 )
+
 # Фикстура с тестовыми данными
 @pytest.fixture
 def transactions():
@@ -23,8 +24,7 @@ def test_filter_by_currency_basic(transactions):
     for tx in usd_transactions:
         assert tx['operationAmount']['currency'] == "USD"
 
-
-# Тест 2: фильтрация по несуществующей валюте 
+# Тест 2: фильтрация по несуществующей валюте
 def test_filter_by_currency_nonexistent(transactions):
     nonexistent_currency = list(filter_by_currency(transactions, "JPY"))
     assert len(nonexistent_currency) == 0
@@ -47,7 +47,7 @@ def test_filter_by_currency_single_match():
     assert len(result) == 1
     assert result[0]["operationAmount"]["currency"] == "EUR"
 
-# Тест 5: одна транзакция, не совпадающая с фильтром 
+# Тест 5: одна транзакция, не совпадающая с фильтром
 def test_filter_by_currency_single_no_match():
     single_tx = [{"id": 1, "currency": "EUR", "amount": 100}]
     result = list(filter_by_currency(single_tx, "USD"))
@@ -92,7 +92,6 @@ def test_filter_by_currency_missing_key():
     assert len(result) == 1
     assert result[0]["operationAmount"]["currency"] == "USD"
 
-    
 def test_filter_by_currency_invalid_input_type():
     with pytest.raises(TypeError):
         list(filter_by_currency("not a list", "USD"))
@@ -133,32 +132,6 @@ def test_filter_by_currency_edge_cases_currency():
     # None в качестве валюты (если допустимо)
     result_none = list(filter_by_currency([], None))
     assert len(result_none) == 0
-    
-def test_filter_by_currency_invalid_input_type():
-    with pytest.raises(TypeError):
-        list(filter_by_currency("not a list", "USD"))
-    with pytest.raises(TypeError):
-        list(filter_by_currency(123, "USD"))
-    with pytest.raises(TypeError):
-        list(filter_by_currency({"key": "value"}, "USD"))
-
-def test_filter_by_currency_invalid_operation_amount():
-    transactions = [
-        {"id": 1, "operationAmount": "not a dict"},
-        {"id": 2, "operationAmount": None},
-        {"id": 3, "operationAmount": 123}
-    ]
-    result = list(filter_by_currency(transactions, "USD"))
-    assert len(result) == 0
-
-def test_filter_by_currency_missing_currency_in_operation_amount():
-    transactions = [
-        {"id": 1, "operationAmount": {"amount": 100}},
-        {"id": 2, "operationAmount": {}},
-        {"id": 3, "operationAmount": {"other_field": "value"}}
-    ]
-    result = list(filter_by_currency(transactions, "USD"))
-    assert len(result) == 0
 
 def test_filter_by_currency_skip_none_and_non_dict():
     transactions = [
@@ -170,17 +143,6 @@ def test_filter_by_currency_skip_none_and_non_dict():
     result = list(filter_by_currency(transactions, "USD"))
     assert len(result) == 1
     assert result[0]["id"] == 1
-
-def test_filter_by_currency_edge_cases_currency():
-    # Пустая строка
-    result_empty = list(filter_by_currency([], ""))
-    assert len(result_empty) == 0
-
-    # None в качестве валюты (если допустимо)
-    result_none = list(filter_by_currency([], None))
-    assert len(result_none) == 0
-
-    import pytest
 
 def test_description_generator_with_description():
     transactions = [
@@ -206,125 +168,6 @@ def test_description_generator_mixed():
     ]
     result = list(description_generator(transactions))
     assert result == ["Оплата услуг", "Описание отсутствует", "Возврат средств"]
-
-def test_card_number_generator_normal_range():
-    result = list(card_number_generator(123456789012345, 123456789012347))
-    expected = [
-        "0123456789012345",
-        "0123456789012346",
-        "0123456789012347"
-    ]
-    assert result == expected
-
-def test_card_number_generator_single_number():
-    result = list(card_number_generator(1000, 1000))
-    assert result == ["0000000000001000"]
-
-def test_card_number_generator_empty_range():
-    result = list(card_number_generator(100, 99))
-    assert result == []
-
-def test_card_number_generator_leading_zeros():
-    result = list(card_number_generator(1, 3))
-    expected = ["0000000000000001", "0000000000000002", "0000000000000003"]
-    assert result == expected
-
-def test_card_number_generator_large_numbers():
-    result = list(card_number_generator(9999999999999998, 9999999999999999))
-    expected = [
-        "9999999999999998",
-        "9999999999999999"
-    ]
-    assert result == expected
-
-def test_transaction_descriptions_with_descriptions():
-    """Тест: все транзакции содержат поле description."""
-    transactions = [
-        {"id": 1, "description": "Перевод со счета на счет"},
-        {"id": 2, "description": "Покупка в магазине"},
-        {"id": 3, "description": "Оплата услуг ЖКХ"}
-    ]
-    result = list(transaction_descriptions(transactions))
-    expected = ["Перевод со счета на счет", "Покупка в магазине", "Оплата услуг ЖКХ"]
-    assert result == expected
-
-
-def test_transaction_descriptions_without_descriptions():
-    """Тест: ни одна транзакция не содержит поле description."""
-    transactions = [
-        {"id": 1, "amount": 100},
-        {"id": 2, "amount": 200, "currency": "RUB"},
-        {"id": 3}
-    ]
-    result = list(transaction_descriptions(transactions))
-    expected = ["Описание отсутствует", "Описание отсутствует", "Описание отсутствует"]
-    assert result == expected
-
-def test_transaction_descriptions_mixed():
-    """Тест: смешанный случай — некоторые транзакции имеют description, некоторые нет."""
-    transactions = [
-        {"id": 1, "description": "Перевод другу"},
-        {"id": 2},  # без описания
-        {"id": 3, "description": "Оплата интернета"},
-        {"id": 4, "amount": 500}  # без описания
-    ]
-    result = list(transaction_descriptions(transactions))
-    expected = [
-        "Перевод другу",
-        "Описание отсутствует",
-        "Оплата интернета",
-        "Описание отсутствует"
-    ]
-    assert result == expected
-
-def test_transaction_descriptions_empty_list():
-    """Тест: пустой список транзакций."""
-    transactions = []
-    result = list(transaction_descriptions(transactions))
-    assert result == []
-
-def test_transaction_descriptions_single_transaction_with_description():
-    """Тест: одна транзакция с описанием."""
-    transactions = [{"id": 1, "description": "Единственный перевод"}]
-    result = list(transaction_descriptions(transactions))
-    assert result == ["Единственный перевод"]
-
-def test_transaction_descriptions_single_transaction_without_description():
-    """Тест: одна транзакция без описания."""
-    transactions = [{"id": 1}]
-    result = list(transaction_descriptions(transactions))
-    assert result == ["Описание отсутствует"]
-
-def test_transaction_descriptions_none_input():
-    """Тест: входное значение None."""
-    with pytest.raises(TypeError):
-        list(transaction_descriptions(None))
-
-def test_transaction_descriptions_non_iterable_input():
-    """Тест: неитерируемый входной параметр (число)."""
-    with pytest.raises(TypeError):
-        list(transaction_descriptions(123))
-
-def test_transaction_descriptions_list_with_non_dict_elements():
-    """Тест: список содержит не словари."""
-    transactions = ["не словарь", 123, None]
-    with pytest.raises(KeyError):
-        list(transaction_descriptions(transactions))
-
-def test_transaction_descriptions_generator_behavior():
-    """Тест: проверка ленивой загрузки (генератора)."""
-    transactions = [
-        {"id": 1, "description": "Первая транзакция"},
-        {"id": 2, "description": "Вторая транзакция"}
-    ]
-    generator = transaction_descriptions(transactions)
-    first = next(generator)
-    second = next(generator)
-    assert first == "Первая транзакция"
-    assert second == "Вторая транзакция"
-
-    #card_number_generator
-    import pytest
 
 def test_card_number_generator_normal_range():
     """Тест: нормальный диапазон номеров карт (16‑значные)."""
@@ -395,3 +238,90 @@ def test_card_number_generator_large_range():
         "1000000000000002"
     ]
     assert result == expected
+
+def test_transaction_descriptions_with_descriptions():
+    """Тест: все транзакции содержат поле description."""
+    transactions = [
+        {"id": 1, "description": "Перевод со счета на счет"},
+        {"id": 2, "description": "Покупка в магазине"},
+        {"id": 3, "description": "Оплата услуг ЖКХ"}
+    ]
+    result = list(transaction_descriptions(transactions))
+    expected = ["Перевод со счета на счет", "Покупка в магазине", "Оплата услуг ЖКХ"]
+    assert result == expected
+
+def test_transaction_descriptions_without_descriptions():
+    """Тест: ни одна транзакция не содержит поле description."""
+    transactions = [
+        {"id": 1, "amount": 100},
+        {"id": 2, "amount": 200, "currency": "RUB"},
+        {"id": 3}
+    ]
+    result = list(transaction_descriptions(transactions))
+    expected = ["Описание отсутствует", "Описание отсутствует", "Описание отсутствует"]
+    assert result == expected
+
+def test_transaction_descriptions_mixed():
+    """Тест: смешанный случай — некоторые транзакции имеют description, некоторые нет."""
+    transactions = [
+        {"id": 1, "description": "Перевод другу"},
+        {"id": 2},  # без описания
+        {"id": 3, "description": "Оплата интернета"},
+        {"id": 4, "amount": 500}  # без описания
+    ]
+    result = list(transaction_descriptions(transactions))
+    expected = [
+        "Перевод другу",
+        "Описание отсутствует",
+        "Оплата интернета",
+        "Описание отсутствует"
+    ]
+    assert result == expected
+
+def test_transaction_descriptions_empty_list():
+    """Тест: пустой список транзакций."""
+    transactions = []
+    result = list(transaction_descriptions(transactions))
+    assert result == []
+
+def test_transaction_descriptions_single_transaction_with_description():
+    """Тест: одна транзакция с описанием."""
+    transactions = [{"id": 1, "description": "Единственный перевод"}]
+    result = list(transaction_descriptions(transactions))
+    assert result == ["Единственный перевод"]
+
+def test_transaction_descriptions_single_transaction_without_description():
+    """Тест: одна транзакция без описания."""
+    transactions = [{"id": 1}]
+    result = list(transaction_descriptions(transactions))
+    assert result == ["Описание отсутствует"]
+
+def test_transaction_descriptions_none_input():
+    """Тест: входное значение None."""
+    with pytest.raises(TypeError):
+        list(transaction_descriptions(None))
+
+def test_transaction_descriptions_non_iterable_input():
+    """Тест: неитерируемый входной параметр (число)."""
+    with pytest.raises(TypeError):
+        list(transaction_descriptions(123))
+
+
+def test_transaction_descriptions_list_with_non_dict_elements():
+    """Тест: список содержит не словари."""
+    transactions = ["не словарь", 123, None]
+    result = list(transaction_descriptions(transactions))
+    expected = ["Описание отсутствует", "Описание отсутствует", "Описание отсутствует"]
+    assert result == expected
+
+def test_transaction_descriptions_generator_behavior():
+    """Тест: проверка ленивой загрузки (генератора)."""
+    transactions = [
+        {"id": 1, "description": "Первая транзакция"},
+        {"id": 2, "description": "Вторая транзакция"}
+    ]
+    generator = transaction_descriptions(transactions)
+    first = next(generator)
+    second = next(generator)
+    assert first == "Первая транзакция"
+    assert second == "Вторая транзакция"
