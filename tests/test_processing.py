@@ -1,6 +1,7 @@
-
 import pytest
+
 from src.processing import filter_by_state, sort_by_date
+
 
 class TestProcessing:
     def test_filter_by_state_executed(self, sample_transactions):

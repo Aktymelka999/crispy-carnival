@@ -1,7 +1,8 @@
 import logging
+import sys
 from functools import wraps
 from typing import Any, Callable, Optional
-import sys
+
 
 def log(filename: Optional[str] = None):
     """
@@ -10,6 +11,7 @@ def log(filename: Optional[str] = None):
     Args:
         filename: путь к файлу для записи логов. Если None, логи выводятся в консоль.
     """
+
     def decorator(func: Callable) -> Callable:
         @wraps(func)
         def wrapper(*args, **kwargs) -> Any:
@@ -55,4 +57,5 @@ def log(filename: Optional[str] = None):
                 handler.close()
 
         return wrapper
+
     return decorator

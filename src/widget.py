@@ -1,4 +1,3 @@
-
 def mask_account_card(input_string: str) -> str:
     if not isinstance(input_string, str) or not input_string.strip():
         return ""  # Возвращаем пустую строку для пустого/некорректного ввода
@@ -17,7 +16,7 @@ def mask_account_card(input_string: str) -> str:
         return input_string
 
     # Определяем тип: если в начале строки есть «Счёт», то это счёт
-    is_account = any(word.lower() in input_string.lower() for word in ['счёт', 'account'])
+    is_account = any(word.lower() in input_string.lower() for word in ["счёт", "account"])
     if is_account:
         # Для счёта показываем только последние 4 цифры
         masked = f"**{number[-4:]}"
@@ -26,18 +25,16 @@ def mask_account_card(input_string: str) -> str:
         if len(number) >= 16:
             masked_part = f"{number[:6]}**{number[-4:]}"
             # Форматируем с пробелами: XXXX XX** **** XXXX
-            masked = (
-                masked_part[:4] + " " +
-                masked_part[4:8] + " **** " +
-                number[-4:]
-            )
+            masked = masked_part[:4] + " " + masked_part[4:8] + " **** " + number[-4:]
         else:
             # Если номер короткий, но не счёт — возвращаем как есть
             masked = number
 
     return input_string.replace(number, masked)
 
+
 from datetime import datetime
+
 
 def get_date(date_string: str) -> str:
     """
