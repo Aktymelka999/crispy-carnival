@@ -11,7 +11,7 @@ def main():
         "Visa Classic 6831982476737658",
         "Visa Platinum 8990922113665229",
         "Visa Gold 5999414228426353",
-        "Счет 73654108430135874305"
+        "Счет 73654108430135874305",
     ]
 
     date_test_case = "2024-03-11T02:26:18.671407"
@@ -33,7 +33,9 @@ if __name__ == "__main__":
     main()
 
 from utils import load_transactions
-from widget import BankWidget  #  класс  в widget.py
+
+from widget import BankWidget  # класс  в widget.py
+
 
 def main():
     # 1. Загружаем данные
@@ -43,13 +45,14 @@ def main():
     if not transactions:
         print("Нет транзакций или ошибка загрузки файла.")
         # Здесь можно либо выйти, либо запустить виджет с пустым списком
-        # return 
+        # return
 
     # 3. Инициализируем виджет и передаем туда данные
     app = BankWidget(transactions)
-    
-    # 4. Запускаем цикл отрисовки 
-    app.run() 
+
+    # 4. Запускаем цикл отрисовки
+    app.run()
+
 
 if __name__ == "__main__":
     main()

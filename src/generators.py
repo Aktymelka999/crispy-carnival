@@ -41,7 +41,7 @@ def description_generator(transactions):
     if transactions is None:
         raise TypeError("transactions cannot be None")
 
-    if not hasattr(transactions, '__iter__'):
+    if not hasattr(transactions, "__iter__"):
         raise TypeError("transactions must be iterable")
 
     for transaction in transactions:
@@ -72,6 +72,7 @@ def card_number_generator(start, end):
     for number in range(start, end + 1):
         yield f"{number:016d}"
 
+
 def transaction_descriptions(transactions):
     """
     Генератор, возвращающий описания транзакций по очереди.
@@ -84,9 +85,9 @@ def transaction_descriptions(transactions):
         str: описание транзакции, если оно есть; иначе — «Описание отсутствует».
     """
     for transaction in transactions:
-        if isinstance(transaction, dict) and 'description' in transaction:
-            description = transaction['description']
-            if description is not None and description != '':
+        if isinstance(transaction, dict) and "description" in transaction:
+            description = transaction["description"]
+            if description is not None and description != "":
                 yield description
             else:
                 yield "Описание отсутствует"

@@ -20,7 +20,6 @@ def filter_by_state(data, state="EXECUTED"):
     return filtered_data
 
 
-
 def sort_by_date(data, reverse=False):
     """
     Сортирует транзакции по дате (от старых к новым или наоборот).
@@ -37,15 +36,10 @@ def sort_by_date(data, reverse=False):
 
     # Фильтруем транзакции, у которых есть поле 'date'
     valid_transactions = [
-        transaction for transaction in data
-        if isinstance(transaction, dict) and "date" in transaction
+        transaction for transaction in data if isinstance(transaction, dict) and "date" in transaction
     ]
 
     # Сортируем по полю 'date' (строки в формате ISO корректно сортируются лексикографически)
-    sorted_data = sorted(
-        valid_transactions,
-        key=lambda x: x["date"],
-        reverse=reverse
-    )
+    sorted_data = sorted(valid_transactions, key=lambda x: x["date"], reverse=reverse)
 
     return sorted_data

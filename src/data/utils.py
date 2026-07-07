@@ -1,6 +1,7 @@
 import json
 from pathlib import Path
-from typing import List, Dict, Any
+from typing import Any, Dict, List
+
 
 def load_transactions(file_path: str) -> List[Dict[str, Any]]:
     """
@@ -25,7 +26,7 @@ def load_transactions(file_path: str) -> List[Dict[str, Any]]:
         with path.open("r", encoding="utf-8") as f:
             data = json.load(f)
     except (json.JSONDecodeError, OSError):
-        # JSON невалиден или ошибка чтения файла 
+        # JSON невалиден или ошибка чтения файла
         return []
 
     # Проверяем, что данные — это список
