@@ -99,3 +99,7 @@ test-all = "pytest && mypy . && flake8 ."
 
 [tool.pytest.ini_options]
 python_paths = ["src"]
+
+
+requests = "^2.32.3"
+python-dotenv = "^1.0.1"

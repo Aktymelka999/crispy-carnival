@@ -31,3 +31,25 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+from utils import load_transactions
+from widget import BankWidget  #  класс  в widget.py
+
+def main():
+    # 1. Загружаем данные
+    transactions = load_transactions("data/operations.json")
+
+    # 2. Обрабатываем ситуацию отсутствия данных
+    if not transactions:
+        print("Нет транзакций или ошибка загрузки файла.")
+        # Здесь можно либо выйти, либо запустить виджет с пустым списком
+        # return 
+
+    # 3. Инициализируем виджет и передаем туда данные
+    app = BankWidget(transactions)
+    
+    # 4. Запускаем цикл отрисовки 
+    app.run() 
+
+if __name__ == "__main__":
+    main()
