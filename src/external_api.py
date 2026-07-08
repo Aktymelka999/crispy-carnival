@@ -1,55 +1,55 @@
-import os
-
 import requests
+from decimal import Decimal
+from typing import Dict, Any, Optional
+import os
 from dotenv import load_dotenv
 
-# Загружаем переменные из .env (только для запуска вне тестов)
 load_dotenv()
+API_KEY = os.getenv("API_KEY")
 
-API_URL = "https://api.apilayer.com/exchangerates_data/latest"
-API_KEY = os.getenv("EXCHANGE_API_KEY")
+BASE_URL = "https://apilayer.com/exchangerates_data-ap"  
+
+def get_exchange_rate(base_currency: str, target_currency: str) -> Optional[Decimal]:
+    params = {
+        "base": base_currency.upper(),
+        "symbols": target_currency.upper()
+    }
+
+    headers = {
+    "X-API-Key": API_KEY
+}
+    try:
+        response = requests.get(BASE_URL, params=params, headers=headers, timeout=5)
+        response.raise_for_status()
+        data: Dict[str, Any] = response.json()
+
+        # Правильный ключ в ответе: смотрим структуру JSON из документации
+        rates = data.get("rates", {})
+        rate_value = rates.get(target_currency.upper())
+
+        if rate_value is None:
+            return None
+
+        return Decimal(str(rate_value))
+    except (requests.RequestException, ValueError, KeyError):
+        return None
 
 
-def get_exchange_rate(base_currency: str, target_currency: str) -> float:
-    """
-    Получает текущий курс валюты через API.
-    Возвращает float: сколько target_currency стоит 1 единица base_currency.
-    """
-    if not API_KEY:
-        raise ValueError("API ключ не найден. Проверьте переменную EXCHANGE_API_KEY в .env")
+def convert_transaction_amount(transaction: Dict[str, Any]) -> Optional[Decimal]:
+    amount = transaction.get("amount")
+    currency = transaction.get("currency")
+    target_currency = transaction.get("target_currency")
 
-    headers = {"apikey": API_KEY}
-    params = {"base": base_currency, "symbols": target_currency}
+    if amount is None or currency is None or target_currency is None:
+        return None
 
-    response = requests.get(API_URL, headers=headers, params=params, timeout=10)
-    response.raise_for_status()  # Выбросит ошибку, если статус не 2xx
+    rate = get_exchange_rate(currency, target_currency)
+    if rate is None:
+        return None
 
-    data = response.json()
-    rates = data.get("rates", {})
+    try:
+        amount_dec = Decimal(str(amount))
+    except Exception:
+        return None
 
-    if target_currency not in rates:
-        raise ValueError(f"Курс для валюты {target_currency} не найден")
-
-    return float(rates[target_currency])
-
-
-def convert_transaction_to_rub(transaction: dict) -> float:
-    """
-    Принимает транзакцию (dict) и возвращает сумму в рублях (float).
-
-    Логика:
-    - Если валюта RUB -> возвращаем amount.
-    - Если USD или EUR -> запрашиваем курс и конвертируем.
-    - Для остальных валют выбрасываем ошибку (или можно вернуть 0, зависит от требований).
-    """
-    amount = float(transaction.get("amount", 0))
-    currency = transaction.get("currency", "RUB").upper()
-
-    if currency == "RUB":
-        return amount
-
-    if currency in ("USD", "EUR"):
-        rate = get_exchange_rate(currency, "RUB")
-        return amount * rate
-
-    raise ValueError(f"Конвертация для валюты {currency} не поддерживается")
+    return amount_dec * rate
