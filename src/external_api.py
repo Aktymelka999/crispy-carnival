@@ -1,17 +1,13 @@
-
-import os
 import requests
 from decimal import Decimal
 from typing import Dict, Any, Optional
+import os
 from dotenv import load_dotenv
 
 load_dotenv()
 API_KEY = os.getenv("API_KEY")
 
-if not API_KEY:
-    raise RuntimeError("API_KEY не найден. Проверьте .env")
-
-BASE_URL = "https://api.exchangerate.host/latest" 
+BASE_URL = "https://apilayer.com/exchangerates_data-ap"  
 
 def get_exchange_rate(base_currency: str, target_currency: str) -> Optional[Decimal]:
     params = {
@@ -20,14 +16,14 @@ def get_exchange_rate(base_currency: str, target_currency: str) -> Optional[Deci
     }
 
     headers = {
-        "X-API-Key": API_KEY
-    }
-
+    "X-API-Key": API_KEY
+}
     try:
         response = requests.get(BASE_URL, params=params, headers=headers, timeout=5)
         response.raise_for_status()
         data: Dict[str, Any] = response.json()
 
+        # Правильный ключ в ответе: смотрим структуру JSON из документации
         rates = data.get("rates", {})
         rate_value = rates.get(target_currency.upper())
 

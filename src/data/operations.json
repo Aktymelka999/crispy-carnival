@@ -14,9 +14,3 @@
     "description": "Покупка товара"
   }
 ]
-
-[
-  {"amount": 100, "currency": "RUB", "description": "Оплата связи"},
-  {"amount": 50, "currency": "USD", "target_currency": "RUB"},
-  {"amount": 200, "currency": "EUR", "target_currency": "RUB"}
-]

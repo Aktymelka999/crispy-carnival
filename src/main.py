@@ -1,9 +1,5 @@
 from src.widget import get_date, mask_account_card
 
-from src.file_loader import load_transactions
-
-transactions = load_transactions("src/operations.json")
-print(transactions)
 
 def main():
     # Тестовые случаи для маскировки карт и счетов
