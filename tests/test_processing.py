@@ -1,5 +1,3 @@
-import pytest
-
 from src.processing import filter_by_state, sort_by_date
 
 
@@ -22,3 +20,95 @@ class TestProcessing:
         sorted_tx = sort_by_date(sample_transactions, reverse=True)
         dates = [t["date"] for t in sorted_tx]
         assert dates == sorted(dates, reverse=True)
+
+
+class TestFilterByState:
+    def test_filter_executed_only(self):
+        data = [
+            {"id": 1, "state": "EXECUTED", "date": "2024-01-01"},
+            {"id": 2, "state": "PENDING", "date": "2024-01-02"},
+            {"id": 3, "state": "EXECUTED", "date": "2024-01-03"},
+        ]
+        result = filter_by_state(data, "EXECUTED")
+
+        assert len(result) == 2
+        assert result["id"] == 1
+        assert result["id"] == 3
+
+    def test_filter_non_existent_state(self):
+        data = [
+            {"id": 1, "state": "EXECUTED", "date": "2024-01-01"},
+        ]
+        result = filter_by_state(data, "CANCELLED")
+        assert result == []
+
+    def test_filter_invalid_input_not_list(self):
+
+        result = filter_by_state("not a list", "EXECUTED")
+        assert result == []
+
+    def test_filter_dict_validation(self):
+
+        data = [
+            {"id": 1, "state": "EXECUTED", "date": "2024-01-01"},
+            "invalid_item",
+            None,
+            {"id": 2, "state": "EXECUTED", "date": "2024-01-02"},
+        ]
+        result = filter_by_state(data, "EXECUTED")
+        assert len(result) == 2
+
+
+class TestSortByDate:
+    def test_sort_ascending_default(self):
+        data = [
+            {"id": 3, "date": "2024-01-03"},
+            {"id": 1, "date": "2024-01-01"},
+            {"id": 2, "date": "2024-01-02"},
+        ]
+        result = sort_by_date(data)  # reverse=False по умолчанию
+
+        # Проверяем порядок ID: 1, 2, 3
+        ids = [t["id"] for t in result]
+        assert ids == [1, 2, 3]
+
+    def test_sort_descending(self):
+        data = [
+            {"id": 1, "date": "2024-01-01"},
+            {"id": 2, "date": "2024-01-02"},
+            {"id": 3, "date": "2024-01-03"},
+        ]
+        result = sort_by_date(data, reverse=True)
+
+        # Проверяем порядок ID: 3, 2, 1
+        ids = [t["id"] for t in result]
+        assert ids == [3, 2, 1]
+
+    def test_sort_missing_date_field(self):
+        data = [
+            {"id": 1, "date": "2024-01-01"},
+            {"id": 2},  # Нет поля date
+            {"id": 3, "date": "2024-01-03"},
+        ]
+        result = sort_by_date(data)
+
+        assert len(result) == 2
+        assert result["id"] == 1
+        assert result["id"] == 3
+
+    def test_sort_invalid_input_not_list(self):
+        result = sort_by_date("not a list")
+        assert result == []
+
+    def test_sort_iso_format_correctness(self):
+        # ISO формат (YYYY-MM-DD) сортируется лексикографически корректно
+        data = [
+            {"id": 1, "date": "2024-12-31"},
+            {"id": 2, "date": "2024-01-01"},
+            {"id": 3, "date": "2023-12-31"},
+        ]
+        result = sort_by_date(data)
+
+        # Ожидаем: 2023 -> 2024 (янв) -> 2024 (дек)
+        ids = [t["id"] for t in result]
+        assert ids == [3, 2, 1]

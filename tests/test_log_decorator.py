@@ -1,8 +1,5 @@
-import logging
-
 import pytest
-
-from src.decorators.log_decorator import log
+from src.log_decorator import log
 
 
 class TestLogDecorator:
@@ -69,7 +66,7 @@ class TestLogDecorator:
         output_lines = [line.strip() for line in captured.out.split("\n") if line.strip()]
         assert len(output_lines) == 3
         for i, line in enumerate(output_lines):
-            assert line == f"square ok"
+            assert line == "square ok"
 
     def test_exception_handling(self, capsys):
         """Тест обработки исключения: исключение возникает внутри функции."""
