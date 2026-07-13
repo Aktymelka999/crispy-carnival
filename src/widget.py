@@ -1,3 +1,6 @@
+from datetime import datetime
+
+
 def mask_account_card(input_string: str) -> str:
     if not isinstance(input_string, str) or not input_string.strip():
         return ""  # Возвращаем пустую строку для пустого/некорректного ввода
@@ -31,9 +34,6 @@ def mask_account_card(input_string: str) -> str:
             masked = number
 
     return input_string.replace(number, masked)
-
-
-from datetime import datetime
 
 
 def get_date(date_string: str) -> str:

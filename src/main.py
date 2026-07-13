@@ -1,4 +1,6 @@
 from src.widget import get_date, mask_account_card
+from utils import load_transactions
+from widget import BankWidget  # класс  в widget.py
 
 
 def main():
@@ -31,10 +33,6 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-from utils import load_transactions
-
-from widget import BankWidget  # класс  в widget.py
 
 
 def main():
