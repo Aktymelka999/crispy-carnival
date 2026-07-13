@@ -1,6 +1,9 @@
 import json
 from pathlib import Path
 from typing import Any, Dict, List
+import logging
+
+logger = logging.getLogger("src.utils")
 
 
 def load_transactions(file_path: str) -> List[Dict[str, Any]]:
@@ -33,4 +36,25 @@ def load_transactions(file_path: str) -> List[Dict[str, Any]]:
     if not isinstance(data, list):
         return []
 
+    return data
+
+def safe_divide(a, b):
+    try:
+        result = a / b
+        # Логирование успешного случая (INFO)
+        logger.info("Выполнено деление: %s / %s = %s", a, b, result)
+        return result
+    except ZeroDivisionError as e:
+        # Логирование ошибки (ERROR или выше)
+        logger.error("Ошибка деления на ноль: a=%s, b=%s. Детали: %s", a, b, e)
+        return None
+
+
+def process_data(data):
+    if not data:
+        # Ещё один пример ошибки
+        logger.error("Переданы пустые данные в process_data")
+        return None
+    
+    logger.info("Данные успешно обработаны: %r", data)
     return data

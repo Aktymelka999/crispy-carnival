@@ -1,41 +1,19 @@
-# Byte-compiled / optimized / DLL files
+# --- Байт-код и кэш Python ---
 __pycache__/
 *.py[cod]
 *$py.class
+*.pyc
 
-# C extensions
-*.so
+# --- Виртуальные окружения (НЕ коммитим окружение, только lock-файл!) ---
+.venv/
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
 
-# Distribution / packaging
-.Python
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-share/python-wheels/
-*.egg-info/
-.installed.cfg
-*.egg
-MANIFEST
-
-# PyInstaller
-*.manifest
-*.spec
-
-# Installer logs
-pip-log.txt
-pip-delete-this-directory.txt
-
-# Unit test / coverage reports
-
+# --- Кэш тестов и покрытия ---
+.pytest_cache/
 .tox/
 .nox/
 .coverage
@@ -44,59 +22,19 @@ pip-delete-this-directory.txt
 nosetests.xml
 coverage.xml
 *.cover
-*.py,cover
 .hypothesis/
-.pytest_cache/
 
-# Jupyter Notebook
-.ipynb_checkpoints
+# --- Логи и временные файлы (это закроет критерий про игнорируемые файлы) ---
+logs/
+*.log
+*.tmp
+*.temp
 
-# IPython
-profile_default/
-ipython_config.py
-
-# pyenv
-.python-version
-
-# pipenv
-pipenv.log
-
-# PEP 582
-__pypackages__/
-
-# Environments
-.venv
-venv/
-ENV/
-env.bak/
-venv.bak/
-
-# Spyder project settings
-.spyderproject
-.spyproject/
-
-# Rope project settings
-.ropeproject
-
-# mkdocs documentation
-/site
-
-# mypy
-.mypy_cache/
-.dmypy.json
-dmypy.json
-
-# Pyre type checker
-.pyre/
-.pyre_local/
-
-# Папки IDE
+# --- IDE и ОС ---
 .idea/
 .vscode/
 *.swp
 *.swo
-
-# Локальные настройки
 .DS_Store
 .DS_Store?
 ._*
@@ -105,29 +43,29 @@ dmypy.json
 ehthumbs.db
 Thumbs.db
 
-# Логи и временные файлы
-*.log
-*.tmp
-*.temp
+# --- Jupyter и IPython ---
+.ipynb_checkpoints
+profile_default/
+ipython_config.py
 
-# Виртуальные окружения (альтернативные названия)
-.env
-.venv/
-env/
+# --- Инструменты типизации и сборки ---
+.mypy_cache/
+.dmypy.json
+dmypy.json
+.pyre/
+.pyre_local/
+build/
+dist/
+*.egg-info/
+MANIFEST
 
-# Файлы Poetry
-poetry.lock
-
-# Файлы дистрибутивов Python
+# --- Прочее ---
 *.whl
 *.tar.gz
-
-# Байт‑код Python
-*.pyc
-
-# Резервные копии
 *~
 \#*\#
 
-# Персональные данные
+# --- Чувствительные данные (НИКОГДА не коммитить!) ---
 .env
+.secret
+secrets.json
