@@ -1,55 +1,29 @@
-from src.widget import get_date, mask_account_card
-from utils import load_transactions
-from widget import BankWidget  # класс  в widget.py
+import argparse
+from pathlib import Path
+
+from src.loaders import load_transactions_from_file
+from src.processing import filter_by_state, sort_by_date
 
 
-def main():
-    # Тестовые случаи для маскировки карт и счетов
-    card_test_cases = [
-        "Maestro 1596837868705199",
-        "Счет 64686473678894779589",
-        "MasterCard 7158300734726758",
-        "Счет 35383033474447895560",
-        "Visa Classic 6831982476737658",
-        "Visa Platinum 8990922113665229",
-        "Visa Gold 5999414228426353",
-        "Счет 73654108430135874305",
-    ]
+def main() -> None:
+    parser = argparse.ArgumentParser(description="Виджет банковских операций")
+    parser.add_argument(
+        "--data",
+        type=str,
+        required=True,
+        help="Путь к файлу с транзакциями (CSV/XLSX)",
+    )
+    args = parser.parse_args()
 
-    date_test_case = "2024-03-11T02:26:18.671407"
+    file_path = Path(args.data)
+    transactions = load_transactions_from_file(str(file_path))
 
-    print("=== ТЕСТИРОВАНИЕ МАСКИРОВКИ КАРТ И СЧЕТОВ ===")
-    for case in card_test_cases:
-        result = mask_account_card(case)
-        print(f"Вход: {case}")
-        print(f"Выход: {result}")
-        print("-" * 60)
+    filtered = filter_by_state(transactions, "COMPLETED")
+    sorted_tx = sort_by_date(filtered)
 
-    print("\n=== ТЕСТИРОВАНИЕ ФУНКЦИИ get_date ===")
-    print(f"Вход: {date_test_case}")
-    result_date = get_date(date_test_case)
-    print(f"Выход: {result_date}")
-
-
-if __name__ == "__main__":
-    main()
-
-
-def main():
-    # 1. Загружаем данные
-    transactions = load_transactions("data/operations.json")
-
-    # 2. Обрабатываем ситуацию отсутствия данных
-    if not transactions:
-        print("Нет транзакций или ошибка загрузки файла.")
-        # Здесь можно либо выйти, либо запустить виджет с пустым списком
-        # return
-
-    # 3. Инициализируем виджет и передаем туда данные
-    app = BankWidget(transactions)
-
-    # 4. Запускаем цикл отрисовки
-    app.run()
+    print(f"Загружено: {len(transactions)} транзакций")
+    print(f"После фильтрации: {len(filtered)}")
+    print(f"Отсортировано: {len(sorted_tx)}")
 
 
 if __name__ == "__main__":

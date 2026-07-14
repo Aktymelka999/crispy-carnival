@@ -1,14 +1,25 @@
 from datetime import datetime
 
 
+class BankWidget:
+    def __init__(self, account_info: str, date_str: str):
+        self.account_info = account_info
+        self.date_str = date_str
+
+    def render(self) -> str:
+        masked = mask_account_card(self.account_info)
+        formatted_date = get_date(self.date_str)
+        return f"[Виджет] Карта/счёт: {masked}, Дата: {formatted_date}"
+
+
 def mask_account_card(input_string: str) -> str:
     if not isinstance(input_string, str) or not input_string.strip():
-        return ""  # Возвращаем пустую строку для пустого/некорректного ввода
+        return ""
+
     parts = input_string.split()
     if len(parts) < 2:
         return input_string
 
-    # Извлекаем номер — последовательность цифр
     number = None
     for part in parts:
         if part.isdigit():
@@ -18,30 +29,33 @@ def mask_account_card(input_string: str) -> str:
     if number is None:
         return input_string
 
-    # Определяем тип: если в начале строки есть «Счёт», то это счёт
     is_account = any(word.lower() in input_string.lower() for word in ["счёт", "account"])
+
     if is_account:
-        # Для счёта показываем только последние 4 цифры
         masked = f"**{number[-4:]}"
     else:
-        # Для карты: первые 6 и последние 4 цифры видны, остальное маскируем
         if len(number) >= 16:
-            masked_part = f"{number[:6]}**{number[-4:]}"
-            # Форматируем с пробелами: XXXX XX** **** XXXX
-            masked = masked_part[:4] + " " + masked_part[4:8] + " **** " + number[-4:]
+            masked_core = "*" * (len(number) - 10)
+            masked = f"{number[:6]}{masked_core}{number[-4:]}"
+            formatted = []
+            for i in range(0, len(masked), 4):
+                formatted.append(masked[i : i + 4])
+            masked = " ".join(formatted)
         else:
-            # Если номер короткий, но не счёт — возвращаем как есть
             masked = number
 
-    return input_string.replace(number, masked)
+    return input_string.replace(number, masked, 1)
 
 
 def get_date(date_string: str) -> str:
-    """
-    Преобразует строку даты в формате 'YYYY-MM-DDTHH:MM:SS' в 'DD.MM.YYYY'.
-    """
-    try:
-        dt = datetime.strptime(date_string, "%Y-%m-%dT%H:%M:%S")
-        return dt.strftime("%d.%m.%Y")
-    except ValueError:
-        raise ValueError("Некорректный формат даты")
+    formats = [
+        "%Y-%m-%dT%H:%M:%S.%f",
+        "%Y-%m-%dT%H:%M:%S",
+    ]
+    for fmt in formats:
+        try:
+            dt = datetime.strptime(date_string, fmt)
+            return dt.strftime("%d.%m.%Y")
+        except ValueError:
+            continue
+    raise ValueError("Некорректный формат даты")

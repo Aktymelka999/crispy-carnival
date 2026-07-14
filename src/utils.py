@@ -25,7 +25,7 @@ def load_transactions(file_path: str) -> List[Dict[str, Any]]:
     try:
         with path.open("r", encoding="utf-8") as f:
             data = json.load(f)
-    except (json.JSONDecodeError, OSError):
+    except json.JSONDecodeError, OSError:
         # JSON невалиден или ошибка чтения файла
         return []
 

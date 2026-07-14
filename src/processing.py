@@ -1,8 +1,7 @@
-from typing import List, Dict, Any
 import logging
+from typing import Any, Dict, List
 
 logger = logging.getLogger("src.processing")
-
 
 
 def filter_by_state(
@@ -13,10 +12,7 @@ def filter_by_state(
         logger.warning("filter_by_state: передан не список, возвращаем пустой список")
         return []
 
-    result = [
-        t for t in transactions
-        if isinstance(t, dict) and t.get("state") == state
-    ]
+    result = [t for t in transactions if isinstance(t, dict) and t.get("state") == state]
     logger.info("Отфильтровано %d транзакций по state=%s", len(result), state)
     return result
 
@@ -37,7 +33,7 @@ def sort_by_date(
         val = txn.get("date")
         if isinstance(val, str):
             return val
-        return "" 
+        return ""
 
     try:
         result = sorted(transactions, key=get_date_key, reverse=reverse)

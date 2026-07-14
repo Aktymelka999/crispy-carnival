@@ -1,95 +1,60 @@
-def filter_by_currency(transactions, currency):
-    """Фильтрует транзакции по валюте.
+from typing import List, Dict, Any, Optional
+import random
 
-    Args:
-        transactions: список транзакций.
-        currency: валюта для фильтрации (строка).
 
-    Yields:
-        Транзакции, где operationAmount.currency совпадает с currency (с учётом регистра).
+def filter_by_currency(transactions: Optional[List[Any]], currency: str) -> List[Dict[str, Any]]:
+    """
+    Фильтрует транзакции по валюте, безопасно обрабатывая «мусорные» данные.
+
+    - Пропускает элементы, которые не являются dict.
+    - Пропускает элементы без ключа 'currency'.
+    - Если на вход пришёл не список — возвращает пустой список.
     """
     if not isinstance(transactions, list):
-        raise TypeError("transactions must be a list")
+        return []
 
-    currency_lower = currency.lower() if currency is not None else None
-
-    for transaction in transactions:
-        if not isinstance(transaction, dict):
+    result: List[Dict[str, Any]] = []
+    for t in transactions:
+        if not isinstance(t, dict):
             continue
-
-        operation_amount = transaction.get("operationAmount")
-        if not isinstance(operation_amount, dict):
+        if "currency" not in t:
             continue
-
-        curr = operation_amount.get("currency")
-        if curr is None:
-            continue
-
-        if curr.lower() == currency_lower:
-            yield transaction
+        if t["currency"] == currency:
+            result.append(t)
+    return result
 
 
-def description_generator(transactions):
-    """Генерирует описания транзакций.
-
-    Args:
-        transactions: список транзакций.
-
-    Yields:
-        Описание транзакции или «Описание отсутствует», если поля description нет.
-    """
-    if transactions is None:
-        raise TypeError("transactions cannot be None")
-
-    if not hasattr(transactions, "__iter__"):
-        raise TypeError("transactions must be iterable")
-
-    for transaction in transactions:
-        if not isinstance(transaction, dict):
-            raise KeyError("Each transaction must be a dict")
-
-        description = transaction.get("description")
-        yield description if description is not None else "Описание отсутствует"
+def card_number_generator(length: int, count: int) -> List[str]:
+    if length <= 0 or count <= 0:
+        return []
+    numbers: List[str] = []
+    for _ in range(count):
+        number = "".join(str(random.randint(0, 9)) for _ in range(length))
+        numbers.append(number)
+    return numbers
 
 
-def card_number_generator(start, end):
-    """Генерирует номера карт в диапазоне от start до end включительно.
+def description_generator(count: int) -> List[str]:
+    templates = [
+        "Оплата покупки в интернет-магазине",
+        "Перевод другу на карту",
+        "Снятие наличных в банкомате",
+        "Пополнение баланса телефона",
+        "Оплата подписки на сервис",
+        "Покупка билетов на поезд",
+        "Оплата заказа в кафе",
+        "Возврат средств за товар",
+        "Платеж по кредиту",
+        "Оплата ЖКХ услуг",
+    ]
+    if count <= 0:
+        return []
+    descriptions: List[str] = []
+    for i in range(count):
+        descriptions.append(f"{templates[i % len(templates)]} #{i + 1}")
+    return descriptions
 
-    Args:
-        start: начальный номер карты (целое число >= 0).
-        end: конечный номер карты (целое число >= start).
 
-    Yields:
-        Номера карт в виде 16‑значных строк с ведущими нулями.
-    """
-    if not isinstance(start, int) or not isinstance(end, int):
-        raise TypeError("start and end must be integers")
-    if start < 0 or end < 0:
-        raise ValueError("start and end must be non-negative")
-    if start > end:
-        return
+def transaction_descriptions(count: int) -> List[str]:
 
-    for number in range(start, end + 1):
-        yield f"{number:016d}"
-
-
-def transaction_descriptions(transactions):
-    """
-    Генератор, возвращающий описания транзакций по очереди.
-
-    Args:
-        transactions (list): список словарей с данными о транзакциях.
-            Каждый словарь может содержать ключ 'description'.
-
-    Yields:
-        str: описание транзакции, если оно есть; иначе — «Описание отсутствует».
-    """
-    for transaction in transactions:
-        if isinstance(transaction, dict) and "description" in transaction:
-            description = transaction["description"]
-            if description is not None and description != "":
-                yield description
-            else:
-                yield "Описание отсутствует"
-        else:
-            yield "Описание отсутствует"
+    return description_generator(count)
