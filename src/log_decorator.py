@@ -1,7 +1,12 @@
+import functools
 import logging
 import sys
 from functools import wraps
-from typing import Any, Callable, Optional
+from typing import Any, Callable, Optional, TypeVar
+
+T = TypeVar("T", bound=Callable[..., Any])
+
+logger = logging.getLogger(__name__)
 
 
 def log(filename: Optional[str] = None):
@@ -59,3 +64,23 @@ def log(filename: Optional[str] = None):
         return wrapper
 
     return decorator
+
+
+T = TypeVar("T", bound=Callable[..., Any])
+
+logger = logging.getLogger(__name__)
+
+
+def log_call(func: T) -> T:
+    @functools.wraps(func)
+    def wrapper(*args: Any, **kwargs: Any) -> Any:
+        logger.debug("Вызов %s с args=%r, kwargs=%r", func.__name__, args, kwargs)
+        try:
+            result = func(*args, **kwargs)
+            logger.debug("%s вернул результат: %r", func.__name__, result)
+            return result
+        except Exception as e:
+            logger.exception("%s завершился с ошибкой: %s", func.__name__, e)
+            raise
+
+    return wrapper
