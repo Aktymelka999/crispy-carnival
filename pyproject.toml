@@ -1,24 +1,18 @@
-[project]
+[tool.poetry]
 name = "project-py"
 version = "0.1.0"
 description = ""
-authors = [
-    {name = "Ksenia", email = "gertrudadeputat35@gmail.com"}
-]
-requires-python = "^3.10"
-dependencies = [
-    "requests>=2.32.3,<3.0.0",
-    "python-dotenv>=1.0.1,<2.0.0"
-]
+authors = ["gertrudadeputat35@gmail.com"]
+readme = "README.md"
+packages = [{ include = "src" }]
 
-[tool.poetry]
-packages = [
-    { include = "src" }
-]
-
-[build-system]
-requires = ["poetry-core>=2.0.0,<3.0.0"]
-build-backend = "poetry.core.masonry.api"
+[tool.poetry.dependencies]
+python = ">=3.11,<3.15"
+requests = ">=2.32.3,<3.0.0"
+python-dotenv = ">=1.0.1,<2.0.0"
+openpyxl = ">=3.1.5,<4.0.0"
+pandas = ">=3.0.3,<4.0.0"
+ruff = ">=0.15.21,<0.16.0"
 
 [tool.poetry.group.dev.dependencies]
 flake8 = ">=7.3.0,<8.0.0"
@@ -27,19 +21,25 @@ isort = ">=8.0.1,<9.0.0"
 mypy = ">=1.19.1,<2.0.0"
 pytest = "^7.0"
 pytest-mock = "^3.10.0"
+pandas-stubs = "^3.0.3.260530"
+autoflake = "^2.3.3"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
 
 [tool.black]
 line-length = 119
-target-version = ["py310"]
+target-version = ["py314"]
 include = "\\.pyi?$"
 extend-exclude = '''
 /(
-  | \\.eggs
-  | \\.git
-  | \\.hg
-  | \\.mypy_cache
-  | \\.tox
-  | \\.venv
+  | .eggs
+  | .git
+  | .hg
+  | .mypy_cache
+  | .tox
+  | .venv
   | build
   | dist
 )/
@@ -47,7 +47,6 @@ extend-exclude = '''
 
 [tool.isort]
 profile = "black"
-line_length = 119
 multi_line_output = 3
 include_trailing_comma = true
 force_grid_wrap = 0
@@ -70,7 +69,8 @@ per-file-ignores = [
 select = ["B", "C", "E", "F", "W", "T4", "B9"]
 
 [tool.mypy]
-python_version = "3.10"
+python_version = "3.14"
+show_error_codes = true
 warn_return_any = true
 warn_unused_configs = true
 disallow_untyped_defs = true

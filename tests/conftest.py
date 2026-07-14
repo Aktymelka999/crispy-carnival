@@ -1,5 +1,7 @@
-import pytest
 from datetime import datetime
+
+import pytest
+
 
 @pytest.fixture
 def sample_transactions():
@@ -11,8 +13,8 @@ def sample_transactions():
             "type": "DEBIT",
             "timestamp": datetime(2024, 6, 1, 10, 30, 0),
             "description": "Оплата услуг",
-            "state": "EXECUTED",          
-            "date": "2024-06-01",         
+            "state": "EXECUTED",
+            "date": "2024-06-01",
         },
         {
             "id": "txn_002",
@@ -21,8 +23,8 @@ def sample_transactions():
             "type": "CREDIT",
             "timestamp": datetime(2024, 6, 2, 9, 15, 0),
             "description": "Возврат средств",
-            "state": "PENDING",         
-            "date": "2024-06-02",         
+            "state": "PENDING",
+            "date": "2024-06-02",
         },
         {
             "id": "txn_003",
@@ -31,7 +33,7 @@ def sample_transactions():
             "type": "DEBIT",
             "timestamp": datetime(2024, 6, 3, 14, 20, 0),
             "description": "Покупка валюты",
-            "state": "EXECUTED",          
-            "date": "2024-06-03",       
+            "state": "EXECUTED",
+            "date": "2024-06-03",
         },
     ]

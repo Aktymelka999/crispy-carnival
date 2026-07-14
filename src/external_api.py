@@ -65,7 +65,7 @@ def convert_transaction_to_rub(transaction: Dict[str, Any]) -> Optional[Decimal]
 
     try:
         amount = Decimal(str(amount_raw))
-    except (InvalidOperation, ValueError, TypeError):
+    except InvalidOperation, ValueError, TypeError:
         return None
 
     currency_upper = currency.upper()

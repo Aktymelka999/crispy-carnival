@@ -1,86 +1,57 @@
 import functools
 import logging
-import sys
-from functools import wraps
-from typing import Any, Callable, Optional, TypeVar
+from logging import FileHandler, StreamHandler
+from typing import Any, Callable, TypeVar, cast
 
 T = TypeVar("T", bound=Callable[..., Any])
 
-logger = logging.getLogger(__name__)
 
-
-def log(filename: Optional[str] = None):
+def log_execution(logger_name: str = "app", filename: str | None = None) -> Callable[[T], T]:
     """
-    Декоратор для логирования начала и конца выполнения функции, а также её результатов или ошибок.
+    Декоратор, который логирует вызов функции.
 
     Args:
-        filename: путь к файлу для записи логов. Если None, логи выводятся в консоль.
+        logger_name: Имя логгера.
+        filename: Если указано, добавит FileHandler в этот файл.
+
+    Returns:
+        Декоратор для функции.
     """
+    logger = logging.getLogger(logger_name)
 
-    def decorator(func: Callable) -> Callable:
-        @wraps(func)
-        def wrapper(*args, **kwargs) -> Any:
-            # Создаём логгер
-            logger = logging.getLogger(func.__name__)
-            logger.setLevel(logging.INFO)
-            logger.propagate = False  # Отключаем передачу вверх по иерархии
-
-            # Очищаем существующие обработчики
-            logger.handlers.clear()
-
-            # Настраиваем обработчик в зависимости от параметра filename
-            if filename is not None:
-                # Логирование в файл
-                handler = logging.FileHandler(filename, encoding="utf-8")
-            else:
-                # Логирование в консоль (stdout)
-                handler = logging.StreamHandler(sys.stdout)
-
+    if not any(isinstance(h, FileHandler) and h.baseFilename == filename for h in logger.handlers):
+        if filename is not None:
+            file_handler = FileHandler(filename, encoding="utf-8")
             formatter = logging.Formatter("%(message)s")
-            handler.setFormatter(formatter)
-            logger.addHandler(handler)
+            file_handler.setFormatter(formatter)
+            logger.addHandler(file_handler)
+
+    if not any(isinstance(h, StreamHandler) for h in logger.handlers):
+        stream_handler = StreamHandler()
+        formatter = logging.Formatter("%(message)s")
+        stream_handler.setFormatter(formatter)
+        logger.addHandler(stream_handler)
+
+    logger.setLevel(logging.INFO)
+
+    def decorator(func: T) -> T:
+        @functools.wraps(func)
+        def wrapper(*args: Any, **kwargs: Any) -> Any:
+            args_repr = ", ".join(repr(a) for a in args)
+            kwargs_repr = ", ".join(f"{k}={v!r}" for k, v in kwargs.items())
+            inputs = f"({args_repr}"
+            if kwargs_repr:
+                inputs += f", {kwargs_repr}"
+            inputs += ")"
 
             try:
-                # Логируем начало выполнения (по условию не требуется, но полезно для отладки)
-                # logger.info(f"{func.__name__} started")
-
-                # Выполняем функцию
                 result = func(*args, **kwargs)
-
-                # Логируем успешное завершение
-                logger.info(f"{func.__name__} ok")
+                logger.info("%s ok", func.__name__)
                 return result
             except Exception as e:
-                # Логируем ошибку с указанием типа и входных параметров
-                error_msg = f"{func.__name__} error: {type(e).__name__}. Inputs: {args}, {kwargs}"
-                logger.error(error_msg)
-                # Перебрасываем исключение дальше
-                raise e
-            finally:
-                # Обязательно удаляем обработчик и закрываем его
-                logger.removeHandler(handler)
-                handler.close()
+                logger.error("%s error: %s. Inputs: %s, {}", func.__name__, type(e).__name__, inputs)
+                raise
 
-        return wrapper
+        return cast(T, wrapper)
 
     return decorator
-
-
-T = TypeVar("T", bound=Callable[..., Any])
-
-logger = logging.getLogger(__name__)
-
-
-def log_call(func: T) -> T:
-    @functools.wraps(func)
-    def wrapper(*args: Any, **kwargs: Any) -> Any:
-        logger.debug("Вызов %s с args=%r, kwargs=%r", func.__name__, args, kwargs)
-        try:
-            result = func(*args, **kwargs)
-            logger.debug("%s вернул результат: %r", func.__name__, result)
-            return result
-        except Exception as e:
-            logger.exception("%s завершился с ошибкой: %s", func.__name__, e)
-            raise
-
-    return wrapper
