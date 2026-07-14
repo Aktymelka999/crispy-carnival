@@ -1,17 +1,37 @@
-import os
-import sys
 import pytest
-
-# Получаем путь к директории tests
-tests_dir = os.path.dirname(__file__)
-# Поднимаемся на уровень вверх (к корневой директории проекта) и добавляем src
-src_path = os.path.abspath(os.path.join(tests_dir, "../src"))
-# Добавляем путь в начало sys.path
-if src_path not in sys.path:
-    sys.path.insert(0, src_path)
-
+from datetime import datetime
 
 @pytest.fixture
-def empty_transactions():
-    """Фикстура для пустого списка транзакций."""
-    return []
+def sample_transactions():
+    return [
+        {
+            "id": "txn_001",
+            "amount": 1500.50,
+            "currency": "RUB",
+            "type": "DEBIT",
+            "timestamp": datetime(2024, 6, 1, 10, 30, 0),
+            "description": "Оплата услуг",
+            "state": "EXECUTED",          
+            "date": "2024-06-01",         
+        },
+        {
+            "id": "txn_002",
+            "amount": -300.00,
+            "currency": "RUB",
+            "type": "CREDIT",
+            "timestamp": datetime(2024, 6, 2, 9, 15, 0),
+            "description": "Возврат средств",
+            "state": "PENDING",         
+            "date": "2024-06-02",         
+        },
+        {
+            "id": "txn_003",
+            "amount": 5000.00,
+            "currency": "USD",
+            "type": "DEBIT",
+            "timestamp": datetime(2024, 6, 3, 14, 20, 0),
+            "description": "Покупка валюты",
+            "state": "EXECUTED",          
+            "date": "2024-06-03",       
+        },
+    ]

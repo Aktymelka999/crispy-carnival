@@ -1,45 +1,52 @@
-def filter_by_state(data, state="EXECUTED"):
-    """
-    Фильтрует список транзакций по указанному статусу.
+from typing import List, Dict, Any
+import logging
 
-    Args:
-        data (list): список транзакций (словарей);
-        state (str): статус для фильтрации (по умолчанию "EXECUTED").
+logger = logging.getLogger("src.processing")
 
-    Returns:
-        list: отфильтрованный список транзакций с указанным статусом.
-    """
-    if not isinstance(data, list):
+
+
+def filter_by_state(
+    transactions: List[Dict[str, Any]],
+    state: str,
+) -> List[Dict[str, Any]]:
+    if not isinstance(transactions, list):
+        logger.warning("filter_by_state: передан не список, возвращаем пустой список")
         return []
 
-    filtered_data = []
-    for transaction in data:
-        if isinstance(transaction, dict) and transaction.get("state") == state:
-            filtered_data.append(transaction)
-
-    return filtered_data
-
-
-def sort_by_date(data, reverse=False):
-    """
-    Сортирует транзакции по дате (от старых к новым или наоборот).
-
-    Args:
-        data (list): список транзакций (словарей) с полем 'date';
-        reverse (bool): если True — сортировка от новых к старым (по умолчанию False).
-
-    Returns:
-        list: отсортированный список транзакций.
-    """
-    if not isinstance(data, list):
-        return []
-
-    # Фильтруем транзакции, у которых есть поле 'date'
-    valid_transactions = [
-        transaction for transaction in data if isinstance(transaction, dict) and "date" in transaction
+    result = [
+        t for t in transactions
+        if isinstance(t, dict) and t.get("state") == state
     ]
+    logger.info("Отфильтровано %d транзакций по state=%s", len(result), state)
+    return result
 
-    # Сортируем по полю 'date' (строки в формате ISO корректно сортируются лексикографически)
-    sorted_data = sorted(valid_transactions, key=lambda x: x["date"], reverse=reverse)
 
-    return sorted_data
+def sort_by_date(
+    transactions: List[Dict[str, Any]],
+    reverse: bool = False,
+) -> List[Dict[str, Any]]:
+    """
+    Сортирует транзакции по полю date (строка в формате YYYY-MM-DD).
+    Элементы без валидного поля date сортируются в начало (при reverse=False).
+    """
+    if not isinstance(transactions, list):
+        logger.warning("sort_by_date: передан не список, возвращаем пустой список")
+        return []
+
+    def get_date_key(txn: Dict[str, Any]) -> str:
+        val = txn.get("date")
+        if isinstance(val, str):
+            return val
+        return "" 
+
+    try:
+        result = sorted(transactions, key=get_date_key, reverse=reverse)
+        logger.info(
+            "Отсортировано %d транзакций, reverse=%s",
+            len(result),
+            reverse,
+        )
+        return result
+    except Exception as e:
+        logger.exception("Ошибка при сортировке транзакций: %s", e)
+        return []

@@ -1,8 +1,9 @@
 import os
+from decimal import Decimal, InvalidOperation
+from typing import Any, Dict, Optional
+
 import requests
 from dotenv import load_dotenv
-from decimal import Decimal, InvalidOperation
-from typing import Dict, Any, Optional
 
 load_dotenv()
 
