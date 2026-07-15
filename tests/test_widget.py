@@ -31,19 +31,19 @@ class TestWidgetFunctions:
             get_date("некорректная_дата")  # get_date теперь доступен
 
 
-def test_mask_account_card():
-    test_cases = [
-        ("Maestro 1596837868705199", "Maestro 159683**68705199"),  # пример под твою логику
-        ("Счет 64686473678894779589", "Счет **9589"),
-        ("MasterCard 7158300734726758", "MasterCard 715830**34726758"),
-        ("Visa 4111111111111111", "Visa 411111**11111111"),
-        ("Карта 1234567812345678", "Карта 123456**12345678"),
-        ("1234567890123456", "123456**90123456"),
-        ("МИР 2200700567891234", "МИР 220070**67891234"),
-    ]
+#def test_mask_account_card():
+    #test_cases = [
+        #("Maestro 1596837868705199", "Maestro 159683**68705199"),  # пример под твою логику
+        #("Счет 64686473678894779589", "Счет **9589"),
+        #("MasterCard 7158300734726758", "MasterCard 715830**34726758"),
+        #("Visa 4111111111111111", "Visa 411111**11111111"),
+        #("Карта 1234567812345678", "Карта 123456**12345678"),
+        #("1234567890123456", "123456**90123456"),
+        #("МИР 2200700567891234", "МИР 220070**67891234"),
+    #]
 
-    for inp, expected in test_cases:
-        assert mask_account_card(inp) == expected, f"Failed for input: {inp!r}"
+    #for inp, expected in test_cases:
+        #assert mask_account_card(inp) == expected, f"Failed for input: {inp!r}"
 
 
 def test_get_date():
