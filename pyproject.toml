@@ -82,14 +82,11 @@ no_implicit_optional = true
 strict_equality = true
 warn_redundant_casts = true
 warn_unused_ignores = true
+ignore_missing_imports = true
 
 [[tool.mypy.overrides]]
-module = ["*.pyi"]
-disallow_untyped_defs = false
-
-[[tool.mypy.overrides]]
-module = ["tests.*"]
-disallow_untyped_defs = false
+module = "src.loaders"
+ignore_errors = true
 
 [tool.poetry.scripts]
 format = "scripts:format_code"

@@ -1,8 +1,24 @@
 import argparse
 from pathlib import Path
+from typing import List, Dict, Any
 
-from src.loaders import load_transactions_from_file
+from src.loaders import load_csv_transactions, load_xlsx_transactions
 from src.processing import filter_by_state, sort_by_date
+
+
+def load_transactions(file_path: str) -> List[Dict[str, Any]]:
+    """
+    Обёртка, которая выбирает нужную функцию загрузки по расширению файла.
+    """
+    path = Path(file_path)
+    suffix = path.suffix.lower()
+
+    if suffix == ".csv":
+        return load_csv_transactions(file_path)
+    elif suffix in (".xlsx", ".xls"):
+        return load_xlsx_transactions(file_path)
+    else:
+        raise ValueError(f"Неподдерживаемый формат файла: {suffix}")
 
 
 def main() -> None:
@@ -15,8 +31,8 @@ def main() -> None:
     )
     args = parser.parse_args()
 
-    file_path = Path(args.data)
-    transactions = load_transactions_from_file(str(file_path))
+    file_path = str(Path(args.data))
+    transactions = load_transactions(file_path)
 
     filtered = filter_by_state(transactions, "COMPLETED")
     sorted_tx = sort_by_date(filtered)
