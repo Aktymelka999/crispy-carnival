@@ -1,36 +1,53 @@
-import json
-from pathlib import Path
-from typing import Any, Dict, List
+from decimal import Decimal, InvalidOperation
+from typing import Any, Optional
 
 
-def load_transactions(file_path: str) -> List[Dict[str, Any]]:
+def get_currency_code(tx: dict[str, Any]) -> Optional[str]:
     """
-    Загружает список транзакций из JSON-файла.
-
-    Возвращает пустой список, если:
-      - файл не найден;
-      - содержимое не является JSON;
-      - JSON не является списком;
-      - список пуст.
-
-    :param file_path: путь к JSON-файлу (может быть относительным или абсолютным)
-    :return: список словарей с транзакциями или пустой список при ошибках
+    Извлекает код валюты из транзакции.
+    Поддерживает оба формата:
+      - плоский: {"currency": "RUB"}
+      - вложенный: {"operationAmount": {"currency": {"code": "RUB"}}}
+    Возвращает код в верхнем регистре или None.
     """
-    path = Path(file_path)
 
-    # Проверка существования файла
-    if not path.exists():
-        return []
+    if "currency" in tx and isinstance(tx["currency"], str):
+        return tx["currency"].upper()
 
-    try:
-        with path.open("r", encoding="utf-8") as f:
-            data = json.load(f)
-    except json.JSONDecodeError, OSError:
-        # JSON невалиден или ошибка чтения файла
-        return []
+    op_amount = tx.get("operationAmount")
+    if isinstance(op_amount, dict):
+        curr = op_amount.get("currency")
+        if isinstance(curr, dict):
+            code = curr.get("code")
+            if code:
+                return str(code).upper()
+            name = curr.get("name", "")
+            if isinstance(name, str) and "руб" in name.lower():
+                return "RUB"
 
-    # Проверяем, что данные — это список
-    if not isinstance(data, list):
-        return []
+    return None
 
-    return data
+
+def get_amount_decimal(tx: dict[str, Any]) -> Decimal:
+    """
+    Безопасное извлечение суммы как Decimal.
+    Поддерживает вложенный формат operationAmount.amount.
+    Если не получилось распарсить — возвращает 0.
+    """
+    amount = tx.get("amount")
+    if amount is not None:
+        try:
+            return Decimal(str(amount))
+        except InvalidOperation:
+            pass
+
+    op_amount = tx.get("operationAmount")
+    if isinstance(op_amount, dict):
+        amount_val = op_amount.get("amount")
+        if amount_val is not None:
+            try:
+                return Decimal(str(amount_val))
+            except InvalidOperation:
+                pass
+
+    return Decimal("0")

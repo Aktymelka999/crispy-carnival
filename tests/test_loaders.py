@@ -12,7 +12,7 @@ from src.loaders import load_csv_transactions, load_xlsx_transactions
 def sample_csv_path(tmp_path):
     """Создаёт временный CSV-файл с тестовыми данными."""
     csv_file = tmp_path / "transactions.csv"
-    # Пробел после # обязателен для Flake8
+
     csv_content = "id,currency,amount\n1,RUB,100\n2,USD,200"
     csv_file.write_text(csv_content, encoding="utf-8")
     return str(csv_file)

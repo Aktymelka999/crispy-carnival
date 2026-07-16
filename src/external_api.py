@@ -3,9 +3,14 @@ from decimal import Decimal, InvalidOperation
 from typing import Any, Dict, Optional
 
 import requests
-from dotenv import load_dotenv
 
-load_dotenv()
+try:
+    from dotenv import load_dotenv
+
+    load_dotenv()
+except ImportError:
+
+    pass
 
 API_URL = "https://api.apilayer.com/exchangerates_data/latest"
 API_KEY = os.getenv("EXCHANGE_API_KEY")

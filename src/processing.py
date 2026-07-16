@@ -1,48 +1,60 @@
-import logging
-from typing import Any, Dict, List
+import re
+from collections import Counter
+from typing import List, Dict, Any
 
-logger = logging.getLogger("src.processing")
+from src.utils import get_currency_code
+
+AVAILABLE_STATUSES = {"EXECUTED", "CANCELED", "PENDING"}
 
 
-def filter_by_state(
-    transactions: List[Dict[str, Any]],
-    state: str,
-) -> List[Dict[str, Any]]:
-    if not isinstance(transactions, list):
-        logger.warning("filter_by_state: передан не список, возвращаем пустой список")
-        return []
-
-    result = [t for t in transactions if isinstance(t, dict) and t.get("state") == state]
-    logger.info("Отфильтровано %d транзакций по state=%s", len(result), state)
+def filter_by_state(transactions: List[Dict[str, Any]], status: str) -> List[Dict[str, Any]]:
+    """Фильтрует транзакции по статусу (state/status), регистронезависимо."""
+    status_upper = status.upper()
+    result = []
+    for tx in transactions:
+        state = tx.get("state") or tx.get("status") or ""
+        if state.upper() == status_upper:
+            result.append(tx)
     return result
 
 
-def sort_by_date(
-    transactions: List[Dict[str, Any]],
-    reverse: bool = False,
-) -> List[Dict[str, Any]]:
-    """
-    Сортирует транзакции по полю date (строка в формате YYYY-MM-DD).
-    Элементы без валидного поля date сортируются в начало (при reverse=False).
-    """
-    if not isinstance(transactions, list):
-        logger.warning("sort_by_date: передан не список, возвращаем пустой список")
-        return []
+def filter_by_currency(transactions: List[Dict[str, Any]], currency_code: str) -> List[Dict[str, Any]]:
+    code = currency_code.upper()
+    return [tx for tx in transactions if get_currency_code(tx) == code]
 
-    def get_date_key(txn: Dict[str, Any]) -> str:
-        val = txn.get("date")
-        if isinstance(val, str):
-            return val
-        return ""
 
-    try:
-        result = sorted(transactions, key=get_date_key, reverse=reverse)
-        logger.info(
-            "Отсортировано %d транзакций, reverse=%s",
-            len(result),
-            reverse,
-        )
-        return result
-    except Exception as e:
-        logger.exception("Ошибка при сортировке транзакций: %s", e)
-        return []
+def sort_by_date(transactions: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    """Сортирует по дате. Поддерживает ISO-строки вида YYYY-MM-DDT..."""
+
+    def key_date(tx: Dict[str, Any]) -> str:
+        d = tx.get("date", "")
+        if not isinstance(d, str):
+            return ""
+        # ISO-строка сортируется лексикографически корректно
+        return d
+
+    return sorted(transactions, key=key_date)
+
+
+def process_bank_search(transactions: List[Dict[str, Any]], search_term: str) -> List[Dict[str, Any]]:
+    """Ищет по описанию с помощью regex (регистронезависимо)."""
+    if not search_term.strip():
+        return transactions
+    pattern = re.compile(re.escape(search_term), flags=re.IGNORECASE)
+    result = []
+    for tx in transactions:
+        desc = str(tx.get("description", ""))
+        if pattern.search(desc):
+            result.append(tx)
+    return result
+
+
+def count_categories(transactions: List[Dict[str, Any]], categories: List[str]) -> Dict[str, int]:
+    patterns = {cat: re.compile(re.escape(cat), flags=re.IGNORECASE) for cat in categories}
+    counter: Counter[str] = Counter()
+    for tx in transactions:
+        description = str(tx.get("description", ""))
+        for category, pattern in patterns.items():
+            if pattern.search(description):
+                counter[category] += 1
+    return dict(counter)
