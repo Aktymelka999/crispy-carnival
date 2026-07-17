@@ -1,5 +1,6 @@
 from typing import List, Dict, Any, Optional
 from pathlib import Path
+
 from src.loaders import load_csv_transactions, load_xlsx_transactions, load_json_transactions
 from src.processing import filter_by_state, sort_by_date, process_bank_search, filter_by_currency
 from src.utils import get_currency_code, get_amount_decimal
@@ -69,10 +70,10 @@ def ask_sort_order() -> str:
 
 def format_transaction(tx: Dict[str, Any]) -> str:
     date_raw = tx.get("date", "")
-    if isinstance(date_raw, str) and len(date_raw) > 10 and date_raw[10] == "T":
+    if isinstance(date_raw, str) and len(date_raw) > 10 and date_raw == "T":
         date_raw = date_raw[:10]
 
-    if len(date_raw) == 10 and date_raw[4] == "-" and date_raw[7] == "-":
+    if len(date_raw) == 10 and date_raw == "-" and date_raw == "-":
         date_fmt = f"{date_raw[8:10]}.{date_raw[5:7]}.{date_raw[0:4]}"
     else:
         date_fmt = date_raw
@@ -88,7 +89,11 @@ def format_transaction(tx: Dict[str, Any]) -> str:
     if from_acc or to_acc:
         lines.append(f"{from_acc} → {to_acc}")
 
-    amount_str = f"{amount:,.2f}".replace(",", " ")
+    if amount is not None:
+        amount_str = f"{amount:,.2f}".replace(",", " ").replace(".", ",")
+    else:
+        amount_str = "0,00"
+
     lines.append(f"Сумма: {amount_str} {currency_code}")
 
     return "\n".join(lines)
@@ -98,7 +103,12 @@ def apply_sorting(transactions: List[Dict[str, Any]], ask_sort: bool) -> List[Di
     if not ask_sort:
         return transactions
     order = ask_sort_order()
-    sorted_tx = sort_by_date(transactions)
+    try:
+        sorted_tx = sort_by_date(transactions)
+    except Exception as e:
+        print(f"Программа: Ошибка при сортировке: {e}")
+        return transactions
+
     if order == "desc":
         sorted_tx.reverse()
     return sorted_tx
@@ -107,6 +117,7 @@ def apply_sorting(transactions: List[Dict[str, Any]], ask_sort: bool) -> List[Di
 def apply_currency_filter(transactions: List[Dict[str, Any]], ask_currency: bool) -> List[Dict[str, Any]]:
     if not ask_currency:
         return transactions
+    
     return filter_by_currency(transactions, "RUB")
 
 
@@ -114,17 +125,30 @@ def apply_search_filter(transactions: List[Dict[str, Any]], ask_search: bool) ->
     if not ask_search:
         return transactions
     search_term = input("Пользователь: ").strip()
-    return process_bank_search(transactions, search_term)
+    if not search_term:
+        return transactions
+    try:
+        return process_bank_search(transactions, search_term)
+    except Exception as e:
+        print(f"Программа: Ошибка при поиске: {e}")
+        return transactions
 
 
 def main() -> None:
     file_path = get_file_path_from_menu()
-    if file_path is None or not file_path.strip():
+    if not file_path or not file_path.strip():
         print("Программа: Путь к файлу не был указан.")
         return
 
     path = Path(file_path)
+    if not path.exists():
+        print(f"Программа: Файл не найден по пути: {path.resolve()}")
+        return
+
     suffix = path.suffix.lower()
+    print(f"Программа: Выбран файл: {path.name} (формат: {suffix})")
+
+    transactions: List[Dict[str, Any]] = []
 
     try:
         if suffix == ".json":
@@ -143,8 +167,20 @@ def main() -> None:
         print(f"Программа: Ошибка при чтении файла: {e}")
         return
 
+    if not transactions:
+        print("Программа: Файл пуст или не содержит корректных данных.")
+        return
+
     status_filter = get_status_filter()
-    filtered = filter_by_state(transactions, status_filter)
+    try:
+        filtered = filter_by_state(transactions, status_filter)
+    except Exception as e:
+        print(f"Программа: Ошибка при фильтрации по статусу: {e}")
+        return
+
+    if not filtered:
+        print("Программа: Не найдено ни одной транзакции с указанным статусом.")
+        return
 
     ask_sort = ask_yes_no("Программа: Отсортировать операции по дате? Да/Нет\nПользователь: ")
     sorted_tx = apply_sorting(filtered, ask_sort)
@@ -159,7 +195,7 @@ def main() -> None:
 
     print("\nПрограмма: Распечатываю итоговый список транзакций...")
     if not final_tx:
-        print("Программа: Не найдено ни одной транзакции, подходящей под ваши условия фильтрации")
+        print("Программа: Не найдено ни одной транзакции, подходящей под ваши условия фильтрации.")
         return
 
     print(f"\nПрограмма: Всего банковских операций в выборке: {len(final_tx)}\n")

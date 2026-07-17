@@ -1,5 +1,6 @@
 import csv
 import json
+from pathlib import Path
 from typing import List, Dict, Any
 
 try:
@@ -9,9 +10,33 @@ except ImportError:
 
 
 def load_csv_transactions(filepath: str) -> List[Dict[str, Any]]:
-    with open(filepath, mode="r", encoding="utf-8") as f:
-        reader = csv.DictReader(f)
-        return [{str(k): v for k, v in row.items()} for row in reader]
+    """
+    Загружает транзакции из CSV файла с разделителем ';'.
+
+    Args:
+        filepath: Относительный или абсолютный путь к файлу.
+
+    Returns:
+        Список словарей с данными транзакций.
+    """
+    file_path = Path(filepath)
+
+    if not file_path.exists():
+        raise FileNotFoundError(f"Файл транзакций не найден: {file_path.resolve()}")
+
+    transactions = []
+
+    with file_path.open("r", encoding="utf-8-sig") as f:
+        reader = csv.DictReader(f, delimiter=";")
+
+        for row in reader:
+
+            clean_row = {k: (v.strip() if isinstance(v, str) else v) for k, v in row.items()}
+
+            if any(clean_row.values()):
+                transactions.append(clean_row)
+
+    return transactions
 
 
 def load_xlsx_transactions(filepath: str) -> List[Dict[str, Any]]:
