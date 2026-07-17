@@ -1,5 +1,5 @@
-from typing import List, Dict, Any, Optional
 import random
+from typing import Any, Dict, List, Optional
 
 
 def filter_by_currency(transactions: Optional[List[Any]], currency: str) -> List[Dict[str, Any]]:
